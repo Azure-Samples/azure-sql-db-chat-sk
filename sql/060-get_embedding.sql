@@ -1,0 +1,37 @@
+create or alter procedure [web].[get_embedding]
+@inputText nvarchar(max),
+@embedding vector(1536) output
+as
+begin trya
+    declare @retval int;
+    declare @payload nvarchar(max) = json_object('input': @inputText);
+    declare @response nvarchar(max)
+    exec @retval = sp_invoke_external_rest_endpoint
+        @url = 'https://<name>.openai.azure.com/openai/deployments/<deployment>/embeddings?api-version=2023-03-15-preview',
+        @method = 'POST',
+        @credential = [https://<name>.openai.azure.com/],
+        @payload = @payload,
+        @response = @response output;
+end try
+begin catch
+    select 
+        'SQL' as error_source, 
+        error_number() as error_code,
+        error_message() as error_message
+    return;
+end catch
+
+if (@retval != 0) begin
+    select 
+        'OPENAI' as error_source, 
+        json_value(@response, '$.result.error.code') as error_code,
+        json_value(@response, '$.result.error.message') as error_message,
+        @response as error_response
+    return;
+end;
+
+declare @re nvarchar(max) = json_query(@response, '$.result.data[0].embedding')
+set @embedding = cast(@re as vector(1536));
+
+return @retval
+go
