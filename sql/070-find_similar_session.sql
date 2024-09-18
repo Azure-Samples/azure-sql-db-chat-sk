@@ -1,5 +1,8 @@
+create procedure web.find_similar_sessions @topic nvarchar(max)
+as
+
 declare @e vector(1536)
-exec [web].[get_embedding] 'data engineering track', @e output;
+exec [web].[get_embedding] @topic, @e output;
 
 with similar_details as 
 (
@@ -28,8 +31,13 @@ similar as
     select * from similar_abstracts
 )
 select top(10) 
-    s.*,
-    distance 
+    s.id,
+    s.title,
+    s.abstract,
+    s.external_id,
+    json_value(s.details, '$.speakers[0]') as speakers,
+    distance,
+    1-distance as cosine_similiarity
 from 
     similar si
 inner join

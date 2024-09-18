@@ -6,10 +6,9 @@ using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
 using Microsoft.SemanticKernel.Connectors.SqlServer;
 using Microsoft.SemanticKernel.Memory;
-using azure_sql_sk;
-using System.Drawing;
 using Microsoft.Extensions.Logging.Console;
 using DotNetEnv;
+using azure_sql_sk;
 
 #pragma warning disable SKEXP0001, SKEXP0010, SKEXP0020
 
