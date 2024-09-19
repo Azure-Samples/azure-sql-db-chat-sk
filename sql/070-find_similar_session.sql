@@ -42,6 +42,8 @@ from
     similar si
 inner join
     [web].[sessions] s on si.session_id = s.id
+where
+    distance <= 0.75
 order by 
     distance
 
