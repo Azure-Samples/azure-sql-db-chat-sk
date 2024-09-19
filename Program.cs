@@ -21,10 +21,10 @@ rootCommand.Add(deployDbCommand);
 
 var chatCommand = new Command("chat", "Run the chatbot");
 chatCommand.AddOption(envFileOption); 
-chatCommand.SetHandler((envFileOptionValue) =>
+chatCommand.SetHandler(async (envFileOptionValue) => 
     {
         var chatBot = new ChatBot(envFileOptionValue);
-        chatBot.Run();
+        await chatBot.RunAsync();
     },
     envFileOption);
 rootCommand.Add(chatCommand);
