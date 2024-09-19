@@ -33,9 +33,10 @@ public class ChatBot
         sqlConnectionString = Env.GetString("MSSQL_CONNECTION_STRING");        
         sqlTableName = Env.GetString("MSSQL_TABLE_NAME") ?? "ChatMemories";
     }
-    public async void Run()
+    public async Task RunAsync()
     {
         Console.WriteLine("Initializing the kernel...");
+        //Console.WriteLine($"azureOpenAIEndpoint: {azureOpenAIEndpoint}, embeddingModelDeploymentName: {embeddingModelDeploymentName}, chatModelDeploymentName: {chatModelDeploymentName}, sqlTableName: {sqlTableName}");
         var sc = new ServiceCollection();
         sc.AddAzureOpenAIChatCompletion(chatModelDeploymentName, azureOpenAIEndpoint, azureOpenAIApiKey);
         sc.AddKernel();
@@ -56,7 +57,7 @@ public class ChatBot
         var memory = new MemoryBuilder()
             .WithSqlServerMemoryStore(sqlConnectionString)
             .WithAzureOpenAITextEmbeddingGeneration(embeddingModelDeploymentName, azureOpenAIEndpoint, azureOpenAIApiKey)
-            .Build();
+            .Build();        
 
         await memory.SaveInformationAsync(sqlTableName, "With the new connector Microsoft.SemanticKernel.Connectors.SqlServer it is possible to efficiently store and retrieve memories thanks to the newly added vector support", "semantic-kernel-mssql");
         await memory.SaveInformationAsync(sqlTableName, "At the moment Microsoft.SemanticKernel.Connectors.SqlServer can be used only with Azure SQL", "semantic-kernel-azuresql");
@@ -78,7 +79,7 @@ public class ChatBot
 
             logger.LogDebug("Searching information from the memory...");
             builder.Clear();
-            await foreach (var result in memory.SearchAsync(sqlTableName, question, limit: 3))
+            await foreach (var result in memory.SearchAsync(sqlTableName, question, limit: 3, minRelevanceScore: 0.5))
             {
                 builder.AppendLine(result.Metadata.Text);
             }
