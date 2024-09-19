@@ -2,7 +2,7 @@ create or alter procedure [web].[get_embedding]
 @inputText nvarchar(max),
 @embedding vector(1536) output
 as
-begin trya
+begin try
     declare @retval int;
     declare @payload nvarchar(max) = json_object('input': @inputText);
     declare @response nvarchar(max)

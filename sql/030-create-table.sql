@@ -23,7 +23,7 @@ GO
 
 CREATE TABLE [web].[sessions_details_embeddings]
 (
-    id INT NOT NULL,
+    [id] INT DEFAULT (NEXT VALUE FOR [web].[global_id]) NOT NULL,
     [session_id] INT NOT NULL,
     details_vector_text3 VECTOR(1536) NOT NULL
 )
@@ -37,7 +37,7 @@ GO
 
 CREATE TABLE [web].[sessions_abstracts_embeddings]
 (
-    id INT NOT NULL,
+    [id] INT DEFAULT (NEXT VALUE FOR [web].[global_id]) NOT NULL,
     [session_id] INT NOT NULL,
     [abstract_vector_text3] vector(1536) not null
 )

@@ -1,3 +1,8 @@
+delete from [web].[sessions] where id = 9;
+delete from [web].[sessions_abstracts_embeddings] where session_id = 9;
+delete from [web].[sessions_details_embeddings] where session_id = 9;
+go
+
 insert into
     [web].[sessions]
 select 
@@ -26,10 +31,11 @@ declare @e as vector(1536);
 select @a = abstract from [web].[sessions] where id = 9;
 exec web.get_embedding @a, @e output;
 insert into [web].[sessions_abstracts_embeddings] ([session_id], abstract_vector_text3) values (9, @e);
+go
 
 declare @d as nvarchar(max);
 declare @e as vector(1536);
 select @d = cast(details as nvarchar(max)) from [web].[sessions] where id = 9;
 exec web.get_embedding @d, @e output;
 insert into [web].[sessions_details_embeddings] ([session_id], details_vector_text3) values (9, @e);
-
+go

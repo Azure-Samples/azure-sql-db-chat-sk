@@ -10,10 +10,12 @@ begin
 end
 go
 
-create database scoped credential [https://<name>.openai.azure.com/]
+create database scoped credential [$OPENAI_URL$]
 with identity = 'HTTPEndpointHeaders', secret = '{"api-key":"$OPENAI_KEY$"}';
 go
 
-create schema [web] AUTHORIZATION [dbo];
+if schema_id('web') is null begin
+    exec('create schema [web] AUTHORIZATION [dbo]');
+end
 go
 
