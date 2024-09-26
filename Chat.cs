@@ -31,7 +31,7 @@ public class ChatBot
         azureOpenAIApiKey = Env.GetString("OPENAI_KEY");
         embeddingModelDeploymentName = Env.GetString("OPENAI_EMBEDDING_DEPLOYMENT_NAME");
         chatModelDeploymentName = Env.GetString("OPENAI_CHAT_DEPLOYMENT_NAME");
-        sqlConnectionString = Env.GetString("MSSQL_CONNECTION_STRING");        
+        sqlConnectionString = Env.GetString("MSSQL_CONNECTION_STRING");
         sqlTableName = Env.GetString("MSSQL_TABLE_NAME") ?? "ChatMemories";
     }
     public async Task RunAsync()
@@ -61,13 +61,17 @@ public class ChatBot
                    (loggerFactory, httpClient) =>
                    {
                        return new AzureOpenAITextEmbeddingGenerationService(
-                           embeddingModelDeploymentName,
-                           azureOpenAIEndpoint,
-                           azureOpenAIApiKey
+                            embeddingModelDeploymentName,
+                            azureOpenAIEndpoint,
+                            azureOpenAIApiKey,
+                            modelId: null,
+                            httpClient: httpClient,
+                            loggerFactory: loggerFactory,
+                            dimensions: 1536
                        );
                    }
                )
-            .Build();        
+            .Build();
 
         await memory.SaveInformationAsync(sqlTableName, "With the new connector Microsoft.SemanticKernel.Connectors.SqlServer it is possible to efficiently store and retrieve memories thanks to the newly added vector support", "semantic-kernel-mssql");
         await memory.SaveInformationAsync(sqlTableName, "At the moment Microsoft.SemanticKernel.Connectors.SqlServer can be used only with Azure SQL", "semantic-kernel-azuresql");
@@ -96,7 +100,7 @@ public class ChatBot
             var contextToRemove = -1;
             if (builder.Length > 0)
             {
-                logger.LogDebug("Found information from the memory:" + Environment.NewLine + builder.ToString());                
+                logger.LogDebug("Found information from the memory:" + Environment.NewLine + builder.ToString());
 
                 builder.Insert(0, "Here's some additional information you can use to answer the question: ");
                 contextToRemove = chat.Count;
