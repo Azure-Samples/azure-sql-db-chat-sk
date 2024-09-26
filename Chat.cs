@@ -3,12 +3,13 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
-using Microsoft.SemanticKernel.Connectors.OpenAI;
+using Microsoft.SemanticKernel.Connectors.AzureOpenAI;
 using Microsoft.SemanticKernel.Connectors.SqlServer;
 using Microsoft.SemanticKernel.Memory;
 using Microsoft.Extensions.Logging.Console;
 using DotNetEnv;
 using Microsoft.IdentityModel.Protocols;
+using Microsoft.SemanticKernel.Connectors.OpenAI;
 
 #pragma warning disable SKEXP0001, SKEXP0010, SKEXP0020
 
@@ -43,20 +44,29 @@ public class ChatBot
         sc.AddLogging(b => b.AddSimpleConsole(o => { o.ColorBehavior = LoggerColorBehavior.Enabled; }).SetMinimumLevel(LogLevel.Debug));
         var services = sc.BuildServiceProvider();
         var logger = services.GetRequiredService<ILogger<Program>>();
-        var openAIPromptExecutionSettings = new OpenAIPromptExecutionSettings()
+        var openAIPromptExecutionSettings = new AzureOpenAIPromptExecutionSettings()
         {
-            ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions
+            FunctionChoiceBehavior = FunctionChoiceBehavior.Auto()
         };
 
         Console.WriteLine("Initializing plugins...");
         var kernel = services.GetRequiredService<Kernel>();
-        kernel.ImportPluginFromObject(new SearchSessionPlugin(kernel, logger, sqlConnectionString));
+        kernel.Plugins.AddFromObject(new SearchSessionPlugin(kernel, logger, sqlConnectionString));
         var ai = kernel.GetRequiredService<IChatCompletionService>();
 
         Console.WriteLine("Initializing memory...");
         var memory = new MemoryBuilder()
             .WithSqlServerMemoryStore(sqlConnectionString)
-            .WithAzureOpenAITextEmbeddingGeneration(embeddingModelDeploymentName, azureOpenAIEndpoint, azureOpenAIApiKey)
+            .WithTextEmbeddingGeneration(
+                   (loggerFactory, httpClient) =>
+                   {
+                       return new AzureOpenAITextEmbeddingGenerationService(
+                           embeddingModelDeploymentName,
+                           azureOpenAIEndpoint,
+                           azureOpenAIApiKey
+                       );
+                   }
+               )
             .Build();        
 
         await memory.SaveInformationAsync(sqlTableName, "With the new connector Microsoft.SemanticKernel.Connectors.SqlServer it is possible to efficiently store and retrieve memories thanks to the newly added vector support", "semantic-kernel-mssql");
@@ -65,7 +75,7 @@ public class ChatBot
         await memory.SaveInformationAsync(sqlTableName, "Pizza is one of the favourite food in the world.", "pizza-favourite-food");
 
         Console.WriteLine("Ready to chat! Hit 'ctrl-c' to quit.");
-        var chat = new ChatHistory("You are an AI assistant that helps developers find information on the SQL Konferenz 2024 conference which is about Microsoft technologies. If users ask about topics you don't know, answer that you don't know. You cannot generate T-SQL code. A plugin will do that for you.");
+        var chat = new ChatHistory("You are an AI assistant that helps developers find information on Microsoft technologies. If users ask about topics you don't know, answer that you don't know.");
         var builder = new StringBuilder();
         while (true)
         {
@@ -86,10 +96,9 @@ public class ChatBot
             var contextToRemove = -1;
             if (builder.Length > 0)
             {
-                logger.LogDebug("Found information from the memory:");
-                logger.LogDebug(builder.ToString());
+                logger.LogDebug("Found information from the memory:" + Environment.NewLine + builder.ToString());                
 
-                builder.Insert(0, "Here's some additional information: ");
+                builder.Insert(0, "Here's some additional information you can use to answer the question: ");
                 contextToRemove = chat.Count;
                 chat.AddSystemMessage(builder.ToString());
             }

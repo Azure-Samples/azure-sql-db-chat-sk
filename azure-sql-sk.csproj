@@ -16,8 +16,8 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="8.0.0" />
-    <PackageReference Include="Microsoft.SemanticKernel" Version="1.17.2" />
-    <PackageReference Include="Microsoft.SemanticKernel.Connectors.OpenAI" Version="1.17.2" />
+    <PackageReference Include="Microsoft.SemanticKernel" Version="1.21.1" />
+    <PackageReference Include="Microsoft.SemanticKernel.Connectors.OpenAI" Version="1.21.1" />
     <PackageReference Include="Microsoft.SemanticKernel.Connectors.SqlServer" Version="1.18.0-alpha" />
     <PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
   </ItemGroup>
