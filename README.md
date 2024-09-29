@@ -53,3 +53,13 @@ To run the application, make sure you have created the `.env` file and deployed 
 ```bash
 dotnet run chat
 ```
+
+The chatbot will start and you can start chatting with it. Use the `/clear` command to clear the chat history and `/history` to see the chat history. End the chat with `ctrl-c`.
+
+The prompot will look like this:
+
+```bash 
+(H: 1) Question: 
+```
+
+`H` indicates the chat memory size. The chatbot will remember the last `H` interactions. You can change the memory size with the `/clear` command.
