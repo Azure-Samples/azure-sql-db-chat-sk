@@ -54,7 +54,7 @@ public class ChatBot
         kernel.Plugins.AddFromObject(new SearchSessionPlugin(kernel, logger, sqlConnectionString));
         var ai = kernel.GetRequiredService<IChatCompletionService>();
 
-        Console.WriteLine("Initializing memory...");
+        Console.WriteLine("Initializing persisted memory...");
         var memory = new MemoryBuilder()
             .WithSqlServerMemoryStore(sqlConnectionString)
             .WithTextEmbeddingGeneration(
@@ -82,14 +82,25 @@ public class ChatBot
         var chat = new ChatHistory("You are an AI assistant that helps developers find information on Microsoft technologies. If users ask about topics you don't know, answer that you don't know.");
         var builder = new StringBuilder();
         while (true)
-        {
-            Console.Write("\nQuestion: ");
+        {            
+            Console.Write($"\n(H: {chat.Count}) Question: ");
             var question = Console.ReadLine()!;
 
             if (string.IsNullOrWhiteSpace(question))
                 continue;
 
-            Console.WriteLine();
+            switch (question)
+            {
+                case "/clear":
+                    chat.RemoveRange(1, chat.Count - 1);
+                    Console.WriteLine("Chat history cleared.");
+                    continue;
+            
+                case "/history":
+                    foreach (var message in chat)
+                        Console.WriteLine(message);
+                    continue;
+            }
 
             logger.LogDebug("Searching information from the memory...");
             builder.Clear();
@@ -97,13 +108,12 @@ public class ChatBot
             {
                 builder.AppendLine(result.Metadata.Text);
             }
-            var contextToRemove = -1;
             if (builder.Length > 0)
             {
                 logger.LogDebug("Found information from the memory:" + Environment.NewLine + builder.ToString());
 
                 builder.Insert(0, "Here's some additional information you can use to answer the question: ");
-                contextToRemove = chat.Count;
+
                 chat.AddSystemMessage(builder.ToString());
             }
 
@@ -114,7 +124,7 @@ public class ChatBot
             {
                 if (firstLine)
                 {
-                    Console.WriteLine("\nAnswer: ");
+                    Console.WriteLine($"\n[H: {chat.Count}] Answer: ");
                     firstLine = false;
                 }
                 Console.Write(message);
@@ -122,9 +132,6 @@ public class ChatBot
             }
             Console.WriteLine();
             chat.AddAssistantMessage(builder.ToString());
-
-            if (contextToRemove >= 0)
-                chat.RemoveAt(contextToRemove);
 
             Console.WriteLine();
         }
