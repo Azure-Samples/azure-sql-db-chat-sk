@@ -36,14 +36,17 @@ public class SearchSessionPlugin(Kernel kernel, ILogger logger, string connectio
         [title]: session's title
         [abstract]: session's abstract
         [external_id]: session id provided by conference organizers
-        [details]: various details about the session (speakers, track, language, level) stored as JSON data            
+        [speakers]: list of speakers of the session
+        [track]: track of the session
+        [language]: language of the session
+        [level]: values can be 100, 200, 300, 400, 500. 500 is the most advanced, 100 is the most basic       
         """)]
     public async Task<IEnumerable<dynamic>> QueryDatabase(string query)
     {        
         logger.LogInformation($"Querying the database for '{query}'");
 
         var ai = kernel.GetRequiredService<IChatCompletionService>();
-        var chat = new ChatHistory(@"You create T-SQL queries based on the given user request and the provided schema. Just return T-SQL query and no other text or explanation. Don't use markdown or any wrappers.
+        var chat = new ChatHistory(@"You create T-SQL queries based on the given user request and the provided schema. Just return T-SQL query to be executed. Do not return other text or explanation. Don't use markdown or any wrappers.
         The database schema is the following:
 
         // this table contains the sessions at the SQL Konferenz 2024 conference
@@ -57,27 +60,15 @@ public class SearchSessionPlugin(Kernel kernel, ILogger logger, string connectio
         );
 
         the [details] column contains JSON data with the following structure:
-        {
-            speakers: string[] // array with the speakers of the session
-            track: string // the track of the session
-            language: string // in which language the session is held
-            level: int // values can be 100, 200, 300, 400, 500. 500 is the most advanced, 100 is the most basic
-        }
-
-        when you need to extract a value from a JSON column, you can use the following functions to get an array or a JSON object:
-
-        CAST(JSON_QUERY(json_column, '$.key') AS NVARCHAR(MAX)) // to extract a JSON object
-        CAST(JSON_QUERY(json_column, '$.key') AS NVARCHAR(MAX)) // to extract a JSON array
-
-        when you need to extract a scalar value, you can use the following functions:
         
-        JSON_VALUE(json_column, '$.key') // to extract a string value
-        JSON_VALUE(json_column, '$.key') // to extract a number value
-        JSON_VALUE(json_column, '$.key') // to extract a boolean value        
+        speakers: [string1, string2, string3...] // JSON array with the speakers of the session
+        track: string // the track of the session
+        language: string // in which language the session is held
+        level: int // session level        
 
-        for example, to extract the speakers from the [details] column, you can use the following query:
-        CAST(JSON_QUERY(details, '$.speakers') AS NVARCHAR(MAX)) 
-        
+        make sure to use JSON_QUERY when querying or filtering a JSON array or a JSON object.
+
+        JSON_QUERY must be casted to NVARCHAR(MAX) to be able to use it.
         ");
 
         chat.AddUserMessage(query);
