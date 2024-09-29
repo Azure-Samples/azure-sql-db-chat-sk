@@ -90,7 +90,7 @@ public class SearchSessionPlugin(Kernel kernel, ILogger logger, string connectio
     }
 
     [KernelFunction("GetSessionSimilarToTopic")]
-    [Description("Returns list of sessions at SQL Konferenz 2024 at that are similar to a specific topic specified in the provided parameter. If no results are found, an empty list is returned. This function only return data from the SQL Konferenz 2024 conference.")]
+    [Description("Return a list of sessions at SQL Konferenz 2024 at that are similar to a specific topic or by a specific speaker name specified in the provided topic parameter. If no results are found, an empty list is returned. This function only return data from the SQL Konferenz 2024 conference.")]
     public async Task<IEnumerable<Session>> GetSessionSimilarToTopic(string topic)
     {        
         logger.LogInformation($"Searching for sessions related to '{topic}'");
