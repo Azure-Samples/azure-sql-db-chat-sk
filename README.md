@@ -66,3 +66,12 @@ The prompot will look like this:
 
 You can now start to chat with your own data. Have fun!
 
+## F.A.Q.
+
+### How can I quickly generate the embeddings for my data already stored in Azure SQL?
+
+Take a look at the Azure SQL Vectorizer repository: 
+
+https://github.com/Azure-Samples/azure-sql-db-vectorizer
+
+It does exactly what you are looking for.
