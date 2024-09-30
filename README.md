@@ -56,7 +56,7 @@ dotnet run chat
 
 The chatbot will start and you can start chatting with it. Use the `/ch` command to clear the chat history and `/h` to see the chat history. End the chat with `ctrl-c`.
 
-The prompot will look like this:
+The prompt will look like this:
 
 ```bash 
 (H: 1) Question: 
