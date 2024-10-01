@@ -91,12 +91,15 @@ public class ChatBot
 
             switch (question)
             {
-                case "/clear":
+                case "/c":
+                    Console.Clear();
+                    continue;
+                case "/ch":
                     chat.RemoveRange(1, chat.Count - 1);
                     Console.WriteLine("Chat history cleared.");
                     continue;
             
-                case "/history":
+                case "/h":
                     foreach (var message in chat)
                         Console.WriteLine(message);
                     continue;
@@ -104,7 +107,7 @@ public class ChatBot
 
             logger.LogDebug("Searching information from the memory...");
             builder.Clear();
-            await foreach (var result in memory.SearchAsync(sqlTableName, question, limit: 3, minRelevanceScore: 0.5))
+            await foreach (var result in memory.SearchAsync(sqlTableName, question, limit: 3, minRelevanceScore: 0.1))
             {
                 builder.AppendLine(result.Metadata.Text);
             }
