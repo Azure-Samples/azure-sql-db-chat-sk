@@ -68,7 +68,8 @@ public class SearchSessionPlugin(Kernel kernel, ILogger logger, string connectio
 
         make sure to use JSON_QUERY when querying or filtering a JSON array or a JSON object.
 
-        JSON_QUERY and OPENJSON must be cast to NVARCHAR(MAX) to be able to use it.
+        JSON_QUERY must be cast to NVARCHAR(MAX) to be able to use it.
+        parameter of OPENJSON must be to NVARCHAR(MAX) to be able to use it.
         ");
 
         chat.AddUserMessage(query);
