@@ -55,7 +55,7 @@ public class ChatBot
         kernel.Plugins.AddFromObject(new SearchSessionPlugin(kernel, logger, sqlConnectionString));
         var ai = kernel.GetRequiredService<IChatCompletionService>();
 
-        Console.WriteLine("Initializing persisted memory...");
+        Console.WriteLine("Initializing long-term memory...");
         var memory = new MemoryBuilder()
             .WithSqlServerMemoryStore(sqlConnectionString)
             .WithTextEmbeddingGeneration(
