@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging.Console;
 using DotNetEnv;
 using Microsoft.IdentityModel.Protocols;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
+using System.Text.Json;
 
 #pragma warning disable SKEXP0001, SKEXP0010, SKEXP0020
 
@@ -102,13 +103,18 @@ public class ChatBot
             
                 case "/h":
                     foreach (var message in chat)
-                        Console.WriteLine(message);
+                    {
+                        Console.WriteLine($"> ---------- {message.Role} ----------");
+                        Console.WriteLine($"> MESSAGE  > {message.Content}");
+                        Console.WriteLine($"> METADATA > {JsonSerializer.Serialize(message.Metadata)}");
+                        Console.WriteLine($"> ------------------------------------");
+                    }                        
                     continue;
             }
 
             logger.LogDebug("Searching information from the memory...");
             builder.Clear();
-            await foreach (var result in memory.SearchAsync(sqlTableName, question, limit: 3, minRelevanceScore: 0.1))
+            await foreach (var result in memory.SearchAsync(sqlTableName, question, limit: 3, minRelevanceScore: 0.5))
             {
                 builder.AppendLine(result.Metadata.Text);
             }
