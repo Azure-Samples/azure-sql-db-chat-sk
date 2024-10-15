@@ -25,7 +25,7 @@ public class SearchSessionPlugin(Kernel kernel, ILogger logger, string connectio
     private readonly Kernel kernel = kernel;    
     private readonly string connectionString = connectionString;
 
-    [KernelFunction("QueryDatabase")]
+    [KernelFunction("query_database")]
     [Description("""
         Query the database to return data for the given query, if there are no other plugins that can be used to answer the query. This function only return data from the SQL Konferenz 2024 conference.
         The high-level schema of the database is the following:
@@ -90,7 +90,7 @@ public class SearchSessionPlugin(Kernel kernel, ILogger logger, string connectio
         return result;
     }
 
-    [KernelFunction("GetSessionSimilarToTopic")]
+    [KernelFunction("find_sessions_similar_to_topic")]
     [Description("Return a list of sessions at SQL Konferenz 2024 at that are similar to a specific topic or by a specific speaker name specified in the provided topic parameter. If no results are found, an empty list is returned. This function only return data from the SQL Konferenz 2024 conference.")]
     public async Task<IEnumerable<Session>> GetSessionSimilarToTopic(string topic)
     {        
