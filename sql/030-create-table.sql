@@ -1,7 +1,7 @@
 CREATE SEQUENCE [web].[global_id] 
- AS [int]
- START WITH 1
- INCREMENT BY 1
+    AS [int]
+    START WITH 1
+    INCREMENT BY 1
 GO
 
 CREATE TABLE [web].[sessions]
@@ -25,7 +25,7 @@ CREATE TABLE [web].[sessions_details_embeddings]
 (
     [id] INT DEFAULT (NEXT VALUE FOR [web].[global_id]) NOT NULL,
     [session_id] INT NOT NULL,
-    details_vector_text3 VECTOR(1536) NOT NULL
+    [details_vector_text3] VECTOR(1536) NOT NULL
 )
 GO
 CREATE CLUSTERED INDEX [ixc] ON [web].[sessions_details_embeddings]([session_id] ASC)
