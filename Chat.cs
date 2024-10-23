@@ -35,6 +35,7 @@ public class ChatBot
         sqlConnectionString = Env.GetString("MSSQL_CONNECTION_STRING");
         sqlTableName = Env.GetString("MSSQL_TABLE_NAME") ?? "ChatMemories";
     }
+
     public async Task RunAsync()
     {
         Console.WriteLine("Initializing the kernel...");
@@ -42,7 +43,7 @@ public class ChatBot
         var sc = new ServiceCollection();
         sc.AddAzureOpenAIChatCompletion(chatModelDeploymentName, azureOpenAIEndpoint, azureOpenAIApiKey);
         sc.AddKernel();
-        sc.AddLogging(b => b.AddSimpleConsole(o => { o.ColorBehavior = LoggerColorBehavior.Enabled; }).SetMinimumLevel(LogLevel.Debug));
+        sc.AddLogging(b => b.AddSimpleConsole(o => { o.ColorBehavior = LoggerColorBehavior.Enabled; }).SetMinimumLevel(LogLevel.None));
         var services = sc.BuildServiceProvider();
         var logger = services.GetRequiredService<ILogger<Program>>();
         var openAIPromptExecutionSettings = new AzureOpenAIPromptExecutionSettings()

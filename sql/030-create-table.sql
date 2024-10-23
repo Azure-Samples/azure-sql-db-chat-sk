@@ -136,4 +136,3 @@ ORDER BY
 GO
 
 EXEC pass.find_communication_history_by_subject 920411, 'premium increase'
-```
