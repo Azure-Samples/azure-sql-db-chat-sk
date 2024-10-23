@@ -9,14 +9,12 @@ using Microsoft.SemanticKernel.Connectors.OpenAI;
 
 namespace azure_sql_sk;
 
-public class Session {
+public class CommunicationHistory {
     public required string Id { get; set; }
-    public required string Title { get; set; }
-    public string? Abstract { get; set; }
-    public string? ExternalId { get; set; }
-    public string? Speakers { get; set; }
-    public decimal Distance { get; set; }
-    public decimal CosineSimilarity { get; set; }  
+    public required string CommunicationType { get; set; }
+
+    public required string Date { get; set; }
+    public required string Details { get; set; }
 }
 
 public class SearchSessionPlugin(Kernel kernel, ILogger logger, string connectionString)
@@ -25,23 +23,31 @@ public class SearchSessionPlugin(Kernel kernel, ILogger logger, string connectio
     private readonly Kernel kernel = kernel;    
     private readonly string connectionString = connectionString;
 
-    [KernelFunction("query_database")]
+    [KernelFunction("query_customers_table")]
     [Description("""
-        Query the database to return data for the given query, if there are no other plugins that can be used to answer the query. This function only return data from the SQL Konferenz 2024 conference.
+        Query the database to find customer's data
         The high-level schema of the database is the following:
         
-        TABLE: [web].[sessions]
+        TABLE: [pass].[customers]
         COLUMNS:
-        [id]: internal id of the sessions,
-        [title]: session's title
-        [abstract]: session's abstract
-        [external_id]: session id provided by conference organizers
-        [speakers]: list of speakers of the session
-        [track]: track of the session
-        [language]: language of the session
-        [level]: values can be 100, 200, 300, 400, 500. 500 is the most advanced, 100 is the most basic       
+        [id]: internal customer id
+        [first_name]: customer first name
+        [last_name]: customer last name
+        [address]: customer home address
+        [city]: customer home city
+        [state]: customer home state
+        [zip]: customer home zip code
+        [country]: customer home country
+        [email]: customer email
+        [status]: customer status (married, single, divorced, widowed, etc)
+        [children]: number of children
+        [children_ages]: children ages
+        [spouse] : spouse name
+        [dob]: customer date of birth
+        [spouse_dob]: spouse date of birth
+        [active-policies]: other type of policies the customer has (life, health, car, homeowners, etc)
         """)]
-    public async Task<IEnumerable<dynamic>> QueryDatabase(string query)
+    public async Task<IEnumerable<dynamic>> QueryCustomersTable(string query)
     {        
         logger.LogInformation($"Querying the database for '{query}'");
 
@@ -49,22 +55,36 @@ public class SearchSessionPlugin(Kernel kernel, ILogger logger, string connectio
         var chat = new ChatHistory(@"You create T-SQL queries based on the given user request and the provided schema. Just return T-SQL query to be executed. Do not return other text or explanation. Don't use markdown or any wrappers.
         The database schema is the following:
 
-        // this table contains the sessions at the SQL Konferenz 2024 conference
-        CREATE TABLE [web].[sessions]
+        // this table contains customer information
+        CREATE TABLE [pass].[customers]
         (
-            [id] INT DEFAULT (NEXT VALUE FOR [web].[global_id]) NOT NULL,
-            [title] NVARCHAR (200) NOT NULL,
-            [abstract] NVARCHAR (MAX) NOT NULL,
-            [external_id] VARCHAR (100) NOT NULL,
-            [details] JSON NULL
-        );
+            [id] INT DEFAULT (NEXT VALUE FOR [pass].[global_id]) NOT NULL,
+            [first_name] NVARCHAR(100) NOT NULL,
+            [last_name] NVARCHAR(100) NOT NULL,
+            [address] NVARCHAR(100) NOT NULL,
+            [city] NVARCHAR(100) NOT NULL,
+            [state] NVARCHAR(100) NOT NULL,
+            [zip] NVARCHAR(100) NOT NULL,
+            [country] NVARCHAR(100) NOT NULL,
+            [email] NVARCHAR(100) NOT NULL,
+            [details] JSON NULL,
+
+            PRIMARY KEY NONCLUSTERED ([id] ASC),
+            UNIQUE NONCLUSTERED ([email] ASC)
+        )
 
         the [details] column contains JSON data with the following structure:
         
-        speakers: [string1, string2, string3...] // JSON array with the speakers of the session
-        track: string // the track of the session
-        language: string // in which language the session is held
-        level: int // session level        
+        status: string - customer status (married, single, divorced, widowed, etc)
+        children: int - number of children
+        email: string - customer email
+        status: string - customer status (married, single, divorced, widowed, etc)
+        children: int - number of children
+        children_ages: [int...int] - children ages
+        spouse: string - spouse name
+        dob: string - customer date of birth (YYYY-MM-DD)
+        spouse_dob: string - spouse date of birth (YYYY-MM-DD)
+        active-policies: [string...string] other type of policies the customer has (life, health, car, homeowners, etc)he session is held        
 
         make sure to use JSON_QUERY when querying or filtering a JSON array or a JSON object.
 
@@ -90,22 +110,136 @@ public class SearchSessionPlugin(Kernel kernel, ILogger logger, string connectio
         return result;
     }
 
-    [KernelFunction("find_sessions_similar_to_topic")]
-    [Description("Return a list of sessions at SQL Konferenz 2024 at that are similar to a specific topic or by a specific speaker name specified in the provided topic parameter. If no results are found, an empty list is returned. This function only return data from the SQL Konferenz 2024 conference.")]
-    public async Task<IEnumerable<Session>> GetSessionSimilarToTopic(string topic)
+    [KernelFunction("query_claims_table")]
+    [Description("""
+        Query the database to find claims data for customers
+        The high-level schema of the database is the following:
+        
+        TABLE: [pass].[claims]
+        COLUMNS:
+        [id]: internal claim id
+        [customer_id]: customer id
+        [claim_type]: claim type (auto, home, life, health, etc)
+        [claim_date]: claim date
+        [details]: details and notes about the claim added by the agent 
+        """)]
+    public async Task<IEnumerable<dynamic>> QueryClaimsTable(string query)
     {        
-        logger.LogInformation($"Searching for sessions related to '{topic}'");
+        logger.LogInformation($"Querying the database for '{query}'");
+
+        var ai = kernel.GetRequiredService<IChatCompletionService>();
+        var chat = new ChatHistory(@"You create T-SQL queries based on the given user request and the provided schema. Just return T-SQL query to be executed. Do not return other text or explanation. Don't use markdown or any wrappers.
+        The database schema is the following:
+
+        // this table contains customer's claims information
+        CREATE TABLE [pass].[claims]
+        (
+            [id] INT NOT NULL,
+            [customer_id] int NOT NULL,
+            [claim_type] VARCHAR (100) NOT NULL,
+            [claim_date] DATETIME2(0) NOT NULL,
+            [details] NVARCHAR(MAX) NOT NULL,
+
+            PRIMARY KEY NONCLUSTERED ([id] ASC)
+        );
+        ");
+
+        chat.AddUserMessage(query);
+        var response = await ai.GetChatMessageContentAsync(chat);
+        if (response.Content == null)
+        {
+            logger.LogWarning("AI was not able to generate a SQL query.");
+            return [];
+        }
+
+        string sqlQuery = response.Content.Replace("```sql", "").Replace("```", "");
+
+        logger.LogInformation($"Executing the following query: {sqlQuery}");
+        
+        await using var connection = new SqlConnection(connectionString);
+        var result = await connection.QueryAsync(sqlQuery);
+
+        return result;
+    }
+
+    [KernelFunction("query_policies_table")]
+    [Description("""
+        Query the database to find policies data for customers
+        The high-level schema of the database is the following:
+        
+        TABLE: [pass].[claims]
+        COLUMNS:
+        [id]: internal claim id
+        [customer_id]: customer id
+        [type]: policy type (auto, home, life, health, etc)
+        [premium]: premium for the policy duration
+        [payment_type]: payment type (monthly, yearly, etc)
+        [start_date]: payment start date
+        [duration]: policy duration (1 month, 6 months, 1 year, etc)
+        [payment_amount]: payment amount
+        [additional_notes]: details and notes about the policy and payment status
+        """)]
+    public async Task<IEnumerable<dynamic>> QueryPoliciesTable(string query)
+    {        
+        logger.LogInformation($"Querying the database for '{query}'");
+
+        var ai = kernel.GetRequiredService<IChatCompletionService>();
+        var chat = new ChatHistory(@"You create T-SQL queries based on the given user request and the provided schema. Just return T-SQL query to be executed. Do not return other text or explanation. Don't use markdown or any wrappers.
+        The database schema is the following:
+
+        // this table contains customer's policies information
+        CREATE TABLE [pass].[policies]
+        (
+            [id] INT NOT NULL,
+            [customer_id] int NOT NULL,
+            [type] VARCHAR (100) NOT NULL,
+            [premium] DECIMAL(9,4) NOT NULL,
+            [payment_type] VARCHAR(50) NOT NULL,
+            [start_date] DATE NOT NULL, 
+            [duration] VARCHAR(50) NOT NULL,
+            [payment_amount] DECIMAL(9,4) NOT NULL,
+            [additional_notes] NVARCHAR(MAX) NULL,
+
+            PRIMARY KEY NONCLUSTERED ([id] ASC)
+        );        
+
+        ");
+
+        chat.AddUserMessage(query);
+        var response = await ai.GetChatMessageContentAsync(chat);
+        if (response.Content == null)
+        {
+            logger.LogWarning("AI was not able to generate a SQL query.");
+            return [];
+        }
+
+        string sqlQuery = response.Content.Replace("```sql", "").Replace("```", "");
+
+        logger.LogInformation($"Executing the following query: {sqlQuery}");
+        
+        await using var connection = new SqlConnection(connectionString);
+        var result = await connection.QueryAsync(sqlQuery);
+
+        return result;
+    }
+
+    [KernelFunction("find_communication_history_by_subject")]
+    [Description("Return interactions history for a customer based on the customer id and the specified subject")]
+    public async Task<IEnumerable<CommunicationHistory>> GetCustomerInteractions(int customerId, string subject)
+    {        
+        logger.LogInformation($"Searching for in customers history for interactions on '{subject}' subject");
 
         DefaultTypeMap.MatchNamesWithUnderscores = true;
 
         await using var connection = new SqlConnection(connectionString);
-        var sessions = await connection.QueryAsync<Session>("web.find_similar_sessions", 
+        var notes = await connection.QueryAsync<CommunicationHistory>("pass.find_communication_history_by_subject", 
             new { 
-                topic                
+                customerId,
+                subject                
             }, 
             commandType: CommandType.StoredProcedure
         );
                      
-        return sessions;    
+        return notes;    
     }
 }

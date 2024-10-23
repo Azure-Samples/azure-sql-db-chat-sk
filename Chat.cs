@@ -54,36 +54,31 @@ public class ChatBot
         var kernel = services.GetRequiredService<Kernel>();
         kernel.Plugins.AddFromObject(new SearchSessionPlugin(kernel, logger, sqlConnectionString));
         var ai = kernel.GetRequiredService<IChatCompletionService>();
-
-        // Commented for now as update to Semantic Kernel is needed to make this work with latest preview
-        // Console.WriteLine("Initializing long-term memory...");
-        // var memory = new MemoryBuilder()
-        //     .WithSqlServerMemoryStore(sqlConnectionString)
-        //     .WithTextEmbeddingGeneration(
-        //            (loggerFactory, httpClient) =>
-        //            {
-        //                return new AzureOpenAITextEmbeddingGenerationService(
-        //                     embeddingModelDeploymentName,
-        //                     azureOpenAIEndpoint,
-        //                     azureOpenAIApiKey,
-        //                     modelId: null,
-        //                     httpClient: httpClient,
-        //                     loggerFactory: loggerFactory,
-        //                     dimensions: 1536
-        //                );
-        //            }
-        //        )
-        //     .Build();
-
-        // Commented for now as update to Semantic Kernel is needed to make this work with latest preview
-        // await memory.SaveInformationAsync(sqlTableName, "With the new connector Microsoft.SemanticKernel.Connectors.SqlServer it is possible to efficiently store and retrieve memories thanks to the newly added vector support", "semantic-kernel-mssql");
-        // await memory.SaveInformationAsync(sqlTableName, "At the moment Microsoft.SemanticKernel.Connectors.SqlServer can be used only with Azure SQL", "semantic-kernel-azuresql");
-        // await memory.SaveInformationAsync(sqlTableName, "Azure SQL support for vectors is in Early Adopter Preview.", "azuresql-vector-eap");
-        // await memory.SaveInformationAsync(sqlTableName, "Pizza is one of the favourite food in the world.", "pizza-favourite-food");
-        // await memory.SaveInformationAsync(sqlTableName, "Davide Mauri is Italian", "davide-mauri");
+        
+        Console.WriteLine("Initializing long-term memory...");
+        var memory = new MemoryBuilder()
+            .WithSqlServerMemoryStore(sqlConnectionString)
+            .WithTextEmbeddingGeneration(
+                   (loggerFactory, httpClient) =>
+                   {
+                       return new AzureOpenAITextEmbeddingGenerationService(
+                            embeddingModelDeploymentName,
+                            azureOpenAIEndpoint,
+                            azureOpenAIApiKey,
+                            modelId: null,
+                            httpClient: httpClient,
+                            loggerFactory: loggerFactory,
+                            dimensions: 1536
+                       );
+                   }
+               )
+            .Build();
+        
+        await memory.SaveInformationAsync(sqlTableName, "Premium for car insurance have been increased by 15% starting from Septmber 2024", "policy-price-increase");        
+        await memory.SaveInformationAsync(sqlTableName, "Car insurance can be suspended for up to two months consective or non-consecutive to reduce premium", "memory-1");                
 
         Console.WriteLine("Ready to chat! Hit 'ctrl-c' to quit.");
-        var chat = new ChatHistory("You are an AI assistant that helps developers find information on Microsoft technologies. If users ask about topics you don't know, answer that you don't know.");
+        var chat = new ChatHistory($"You are an AI assistant that helps insurance agents to find information on customers data and status. Use a professional tone when aswering and provide a summary of data instead of lists. If users ask about topics you don't know, answer that you don't know. Today's date is {DateTime.Now:yyyy-MM-dd}.");    
         var builder = new StringBuilder();
         while (true)
         {            
@@ -114,21 +109,20 @@ public class ChatBot
                     continue;
             }
 
-            // Commented for now as update to Semantic Kernel is needed to make this work with latest preview
-            // logger.LogDebug("Searching information from the memory...");
-            // builder.Clear();
-            // await foreach (var result in memory.SearchAsync(sqlTableName, question, limit: 3, minRelevanceScore: 0.5))
-            // {
-            //     builder.AppendLine(result.Metadata.Text);
-            // }
-            // if (builder.Length > 0)
-            // {
-            //     logger.LogDebug("Found information from the memory:" + Environment.NewLine + builder.ToString());
+            logger.LogDebug("Searching information from the memory...");
+            builder.Clear();
+            await foreach (var result in memory.SearchAsync(sqlTableName, question, limit: 3, minRelevanceScore: 0.3))
+            {
+                builder.AppendLine(result.Metadata.Text);
+            }
+            if (builder.Length > 0)
+            {
+                logger.LogDebug("Found information from the memory:" + Environment.NewLine + builder.ToString());
 
-            //     builder.Insert(0, "Here's some additional information you can use to answer the question: ");
+                builder.Insert(0, "Here's some additional information you can use to answer the question: ");
 
-            //     chat.AddSystemMessage(builder.ToString());
-            // }
+                chat.AddSystemMessage(builder.ToString());
+            }
 
             builder.Clear();
             chat.AddUserMessage(question);
