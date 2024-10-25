@@ -67,7 +67,7 @@ public class SearchSessionPlugin(Kernel kernel, ILogger logger, string connectio
             [zip] NVARCHAR(100) NOT NULL,
             [country] NVARCHAR(100) NOT NULL,
             [email] NVARCHAR(100) NOT NULL,
-            [details] JSON NULL,
+            [details] JSON NULL, -- make sure to cast to NVARCHAR(MAX) before using it in a query with OPENJSON or JSON_QUERY
 
             PRIMARY KEY NONCLUSTERED ([id] ASC),
             UNIQUE NONCLUSTERED ([email] ASC)
@@ -88,8 +88,7 @@ public class SearchSessionPlugin(Kernel kernel, ILogger logger, string connectio
 
         make sure to use JSON_QUERY when querying or filtering a JSON array or a JSON object.
 
-        JSON_QUERY must be cast to NVARCHAR(MAX) to be able to use it.
-        parameter of OPENJSON must be to NVARCHAR(MAX) to be able to use it.
+        details column must be cast to NVARCHAR(MAX) before using it in a query.
         ");
 
         chat.AddUserMessage(query);
