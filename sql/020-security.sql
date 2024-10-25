@@ -13,3 +13,6 @@ go
 create database scoped credential [$OPENAI_URL$]
 with identity = 'HTTPEndpointHeaders', secret = '{"api-key":"$OPENAI_KEY$"}';
 go
+
+create schema [pass] authorization [dbo];
+GO

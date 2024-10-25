@@ -1,64 +1,57 @@
-delete from [web].[sessions] where id = 9;
-delete from [web].[sessions_abstracts_embeddings] where session_id = 9;
-delete from [web].[sessions_details_embeddings] where session_id = 9;
+
+INSERT INTO [pass].[customers] ([id], [first_name], [last_name], [address], [city], [state], [zip], [country], [email], [details])
+VALUES 
+(1539726, 'John', 'Doe', '123 Main St', 'Anytown', 'NY', '12345', 'USA', 'johndoe@contoso.com', '{"status": "single", "dob": "2001-05-28", "active-policies": ["car", "renters"]}'),
+(920411, 'John', 'Doe', '456 Main St', 'Redmond', 'WA', '98052', 'USA', 'jd@adventureworks.com', '{"status": "married", "children": 2, "children_ages": [5, 7], "spouse": "Jane", "dob": "1978-03-10", "spouse_dob": "1980-08-11", "active-policies": ["umbrella", "car", "homeowners"]}')
 go
 
-insert into
-    [web].[sessions]
-select 
-    * 
-from 
-    openjson(
-        '[{
-            "id": 9,
-            "title": "Azure SQL and SQL Server: All Things Developers",
-            "abstract": "Over the past two decades, SQL Server has undergone a remarkable evolution, emerging as the most widely deployed database in the world. A great number of new features have been announced for Azure SQL and SQL Server to support developers in being more efficient and productive when creating new solutions and applications or when modernizing existing ones. In this session, we go over all the lastest released features  such as JSON, Data API builder, calling REST endpoints, Azure function integrations and much more, so that you''ll learn how to take advantage of them right away.",
-            "external_id": "683984",
-            "details": {"speakers":["Davide Mauri"],"track":"Data Engineering","language":"English","level":300},
-            "require_embeddings_update": "0"
-        }]') with (
-            id int '$.id',
-            title nvarchar(200) '$.title',
-            abstract nvarchar(max) '$.abstract',
-            external_id varchar(100) '$.external_id',
-            details nvarchar(max) '$.details' as json,
-            require_embeddings_update bit '$.require_embeddings_update'
-        )
+INSERT INTO [pass].[claims] ([id], [customer_id], [claim_type], [claim_date], [details])
+VALUES 
+(9323, 1539726, 'auto', '2021-03-06', 'customer was rear-ended, small damage'),
+(9802, 920411, 'auto', '2021-03-06', 'customer was rear-ended, small damage to the rear bumper. The bumper was replaced by a in-network shop and the customer didn''t have to pay anything.'),
+(10323, 920411, 'auto', '2022-07-03', 'customer had a broken glass due to a stone hitting the left door window. The window was replaced and the customer was reimbursed for the cost of the window and the labor.'),
+(11237, 920411, 'auto', '2023-01-02', 'faulty battery, customer was towed to the closest car shop and faulty batter was replaced. Customer was reimbursed for the cost of the battery and the towing service');
 go
 
-insert into
-    [web].[sessions]
-select 
-    * 
-from 
-    openjson(
-        '[{
-            "id": 2,
-            "title": "Erkläre meiner techniknahen Frau Fabric und seine Fähigkeit, Daten sofort zu analysieren",
-            "abstract": "Das Erlernen einer neuen Technologie wie Fabric ähnelt dem Erlernen einer neuen Sprache. Es gibt unbekannte Wörter, Grammatik und Konzepte, aber vieles ist ähnlich zu dem, was du bereits kennst. Wenn du dich im Umfeld von Microsoft Data befindest, bin ich mir sicher, dass du gefragt wurdest: Was ist Microsoft Fabric? Und Wofür können wir es verwenden? So haben meine techniknahe Ehefrau und ich diese Fragen geklärt und die Sprachbarriere überwunden :-) Wir werden auch zeigen, wie du Echtzeitanalysen über dein Smart Home in Microsoft Fabric abfragen kannst. Also, wenn du keine Ahnung hast, was Fabric ist, oder wenn du Fabric jemandem erklären musst, der keine Ahnung hat, könnten diese 10 Minuten nützlich für dich sein.  Explaining Fabric and its ability to analyse data instantly to my tech-adjacent wife  Learning a new technology like Fabric is similar learning a new language. There are unfamiliar words, grammar, and concepts but a lot is similar to what you already know. If you are around Microsoft Data I am certain that you will have been asked. What is Microsoft Fabric ? And What can we use it for? This is how my tech-adjacent wife, and I resolved those questions and broke down the language barrier :-) We will also show how you can query Real-Time Analytics about your smart home in Microsoft Fabric. So if you have no idea what Fabric is or you have to explain Fabric to someone who has no idea maybe these 10 minutes may be useful for you.",
-            "external_id": "456",
-            "details": {"speakers":["Rob Sewell"],"track":"Analytics & Data Science","language":"German","level":100},
-            "require_embeddings_update": "0"
-        }]') with (
-            id int '$.id',
-            title nvarchar(200) '$.title',
-            abstract nvarchar(max) '$.abstract',
-            external_id varchar(100) '$.external_id',
-            details nvarchar(max) '$.details' as json,
-            require_embeddings_update bit '$.require_embeddings_update'
-        )
+INSERT INTO [pass].[policies] ([id], [customer_id], [type], [premium], [payment_type], [start_date], [duration], [payment_amount], [additional_notes])
+VALUES
+(1203, 920411, 'auto', 2400.66, 'monthly', '2021-07-10', '6 months', 400.11, 'all payments in good standing. no missed or late payment so far.'),
+(4053, 920411, 'auto', 2617.26, 'monthly', '2022-01-10', '6 months', 436.21, 'all payments in good standing. no missed or late payment so far.'),
+(10223, 920411, 'auto', 2936.04, 'monthly', '2022-07-10', '6 months', 489.34, 'all payments in good standing. no missed or late payment so far.'),
+(12005, 920411, 'auto', 2936.04, 'monthly', '2023-01-10', '6 months', 489.34, 'all payments in good standing. no missed or late payment so far.'),
+(16884, 920411, 'auto', 2936.04, 'monthly', '2023-07-10', '6 months', 489.34, 'all payments in good standing. no missed or late payment so far.'),
+(23456, 920411, 'auto', 3001.32, 'monthly', '2024-01-10', '6 months', 500.22, 'all payments in good standing. no missed or late payment so far.'),
+(67832, 920411, 'auto', 3212.45, 'monthly', '2024-07-10', '6 months', 535.41, 'all payments in good standing. no missed or late payment so far.')
 go
 
-declare @a as nvarchar(max);
-declare @e as vector(1536);
-select @a = abstract from [web].[sessions] where id = 9;
-exec web.get_embedding @a, @e output;
-insert into [web].[sessions_abstracts_embeddings] ([session_id], abstract_vector_text3) values (9, @e);
+INSERT INTO [pass].[communication_history] ([id], [customer_id], [communication_type], [communication_date], [details])
+VALUES
+(9213, 920411, 'mail', '2023-08-11', 'customer reached out to understand why the premium increased by 10%, customer was informed that the premium increased due to the increase in the cost of the parts and labor. Customer was satisfied with the explanation and decided to keep the policy.'),
+(12012, 920411, 'phone', '2023-09-20', 'customer reached our to understand if his policy also covers rented cars. Customer was informed that the policy do cover rented cars for up to 15 days. Car must be retned in the US and Canada. Customer was very happy with the information.'),
+(14053, 920411, 'phone', '2024-01-16', 'customer reached out to ask to have heads up when premium increases. Customer was informed that we will send an email 30 days before the premium increases. Customer was happy with the information, but not happy that he didn''t receive anything this time.'),
+(18928, 920411, 'mail', '2024-07-17', 'customer very unhappy about the premium is increased again. almost furious as he didn''t got any upfront information about that. evaluating to move to another company.'),
+(19022, 920411, 'phone', '2024-07-17', 'john reached out to ask for a meeting with agent urgently. he didn''t provide any details about the reason for the meeting.')
 go
 
-declare @d as nvarchar(max);
-declare @e as vector(1536);
-select @d = cast(details as nvarchar(max)) from [web].[sessions] where id = 9;
-exec web.get_embedding @d, @e output;
-insert into [web].[sessions_details_embeddings] ([session_id], details_vector_text3) values (9, @e);
+-- create loop to call get_embeddings for each row in [pass].[communication_history]. use a forward only cursor
+DECLARE @id INT, @details NVARCHAR(MAX);
+DECLARE @e VECTOR(1536)
+DECLARE C CURSOR LOCAL FORWARD_ONLY FOR
+SELECT [id], [details] FROM [pass].[communication_history];
+OPEN C;
+FETCH NEXT FROM C INTO @id, @details;
+WHILE @@FETCH_STATUS = 0
+BEGIN
+    EXEC [pass].[get_embedding] @details, @e OUTPUT;
+    UPDATE [pass].[communication_history] SET [embedding] = @e WHERE [id] = @id;
+    FETCH NEXT FROM C INTO @id, @details;
+END
+CLOSE C;
+DEALLOCATE C;
 go
+
+EXEC pass.find_communication_history_by_subject 920411, 'premium increase'
+GO
+
+EXEC pass.find_communication_history_by_subject 920411, 'car insurance details'
+GO
