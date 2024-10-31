@@ -38,13 +38,6 @@ public class SearchSessionPlugin(Kernel kernel, ILogger logger, string connectio
         [state]: customer home state
         [zip]: customer home zip code
         [country]: customer home country
-        [email]: customer email
-        [status]: customer status (married, single, divorced, widowed, etc)
-        [children]: number of children
-        [children_ages]: children ages
-        [spouse] : spouse name
-        [dob]: customer date of birth
-        [spouse_dob]: spouse date of birth
         [active-policies]: other type of policies the customer has (life, health, car, homeowners, etc)
         """)]
     public async Task<IEnumerable<dynamic>> QueryCustomersTable(string query)
@@ -66,25 +59,13 @@ public class SearchSessionPlugin(Kernel kernel, ILogger logger, string connectio
             [state] NVARCHAR(100) NOT NULL,
             [zip] NVARCHAR(100) NOT NULL,
             [country] NVARCHAR(100) NOT NULL,
-            [email] NVARCHAR(100) NOT NULL,
             [details] JSON NULL, -- make sure to cast to NVARCHAR(MAX) before using it in a query with OPENJSON or JSON_QUERY
-
-            PRIMARY KEY NONCLUSTERED ([id] ASC),
-            UNIQUE NONCLUSTERED ([email] ASC)
+            PRIMARY KEY NONCLUSTERED ([id] ASC)
         )
 
         the [details] column contains JSON data with the following structure:
         
-        status: string - customer status (married, single, divorced, widowed, etc)
-        children: int - number of children
-        email: string - customer email
-        status: string - customer status (married, single, divorced, widowed, etc)
-        children: int - number of children
-        children_ages: [int...int] - children ages
-        spouse: string - spouse name
-        dob: string - customer date of birth (YYYY-MM-DD)
-        spouse_dob: string - spouse date of birth (YYYY-MM-DD)
-        active-policies: [string...string] other type of policies the customer has (life, health, car, homeowners, etc)he session is held        
+        active-policies: [string...string] other type of policies the customer has (life, health, car, homeowners, etc)
 
         make sure to use JSON_QUERY when querying or filtering a JSON array or a JSON object.
 

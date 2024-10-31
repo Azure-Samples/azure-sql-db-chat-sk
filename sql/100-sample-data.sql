@@ -1,8 +1,9 @@
 
 INSERT INTO [pass].[customers] ([id], [first_name], [last_name], [address], [city], [state], [zip], [country], [email], [details])
 VALUES 
-(1539726, 'John', 'Doe', '123 Main St', 'Anytown', 'NY', '12345', 'USA', 'johndoe@contoso.com', '{"status": "single", "dob": "2001-05-28", "active-policies": ["car", "renters"]}'),
-(920411, 'John', 'Doe', '456 Main St', 'Redmond', 'WA', '98052', 'USA', 'jd@adventureworks.com', '{"status": "married", "children": 2, "children_ages": [5, 7], "spouse": "Jane", "dob": "1978-03-10", "spouse_dob": "1980-08-11", "active-policies": ["umbrella", "car", "homeowners"]}')
+(1539726, 'John', 'Doe', '123 Old Road', 'Bellevue', 'WA', '98007', 'USA', 'johndoe@contoso.com', '{}"active-policies": ["car", "renters"]}'),
+(920411, 'John', 'Doe', '456 Main St', 'Redmond', 'WA', '98052', 'USA', 'jd@adventureworks.com', '{"active-policies": ["umbrella", "car", "homeowners"]}'),
+(290332, 'John', 'Doe', '789 Lake Road', 'Kirkland', 'WA', '98017', 'USA', 'johnd2@contoso.com', '{"active-policies": ["car", "boat"]}')
 go
 
 INSERT INTO [pass].[claims] ([id], [customer_id], [claim_type], [claim_date], [details])
