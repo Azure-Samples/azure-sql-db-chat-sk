@@ -90,7 +90,10 @@ public class ChatBot
             
             AnsiConsole.WriteLine("Initializing long-term memory...");
             await memory.SaveInformationAsync(sqlTableName, "Premium for car insurance have been increased by 15% starting from Septmber 2024", "policy-price-increase");        
-            await memory.SaveInformationAsync(sqlTableName, """Customers can reduce there premium by subscribing to the "Safety Score" program which will monitor their driving habits and provide discounts based on their driving score.""", "memory-1");                
+            await memory.SaveInformationAsync(sqlTableName, """
+                Customers can reduce there premium by subscribing to the "Safety Score" program which will 
+                monitor their driving habits and provide discounts based on their driving score.
+            """, "memory-1");                
             
             return (logger, kernel, memory, ai);
         });
