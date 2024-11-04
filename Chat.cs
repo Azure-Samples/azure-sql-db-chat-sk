@@ -76,12 +76,10 @@ public class ChatBot
 
         await memory.SaveInformationAsync(sqlTableName, "With the new connector Microsoft.SemanticKernel.Connectors.SqlServer it is possible to efficiently store and retrieve memories thanks to the newly added vector support", "semantic-kernel-mssql");
         await memory.SaveInformationAsync(sqlTableName, "At the moment Microsoft.SemanticKernel.Connectors.SqlServer can be used only with Azure SQL", "semantic-kernel-azuresql");
-        await memory.SaveInformationAsync(sqlTableName, "Azure SQL support for vectors is in Early Adopter Preview.", "azuresql-vector-eap");
-        await memory.SaveInformationAsync(sqlTableName, "Pizza is one of the favourite food in the world.", "pizza-favourite-food");
-        await memory.SaveInformationAsync(sqlTableName, "Davide Mauri is Italian", "davide-mauri");
+        await memory.SaveInformationAsync(sqlTableName, "Azure SQL support for vectors is in Public Preview.", "azuresql-vector-eap");
 
         Console.WriteLine("Ready to chat! Hit 'ctrl-c' to quit.");
-        var chat = new ChatHistory("You are an AI assistant that helps developers find information on Microsoft technologies. If users ask about topics you don't know, answer that you don't know.");
+        var chat = new ChatHistory("You are an AI assistant that helps developers find information on Microsoft technologies. If users ask about topics you don't know, answer that you don't know. Be concise when answering.");
         var builder = new StringBuilder();
         while (true)
         {            
