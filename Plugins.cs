@@ -204,7 +204,7 @@ public class SearchSessionPlugin(Kernel kernel, ILogger logger, string connectio
     }
 
     [KernelFunction("find_communication_history_by_subject")]
-    [Description("Return interactions history for a customer based on the customer id and the specified subject")]
+    [Description("Return interactions history for a customer based on the customer id on a specified subject. If subject is not provided, return all interactions.")]
     public async Task<IEnumerable<CommunicationHistory>> GetCustomerInteractions(int customerId, string subject)
     {        
         logger.LogInformation($"Searching for in customers history for interactions on '{subject}' subject");
@@ -215,7 +215,7 @@ public class SearchSessionPlugin(Kernel kernel, ILogger logger, string connectio
         var notes = await connection.QueryAsync<CommunicationHistory>("pass.find_communication_history_by_subject", 
             new { 
                 customerId,
-                subject                
+                subject = subject ?? ""               
             }, 
             commandType: CommandType.StoredProcedure
         );
