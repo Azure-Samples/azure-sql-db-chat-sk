@@ -1,10 +1,10 @@
-DROP TABLE IF EXISTS [pass].[customers];
-DROP TABLE IF EXISTS [pass].[claims];
-DROP TABLE IF EXISTS [pass].[policies];
-DROP TABLE IF EXISTS [pass].[communication_history];
+DROP TABLE IF EXISTS [dbo].[customers];
+DROP TABLE IF EXISTS [dbo].[claims];
+DROP TABLE IF EXISTS [dbo].[policies];
+DROP TABLE IF EXISTS [dbo].[communication_history];
 GO
 
-CREATE TABLE [pass].[customers]
+CREATE TABLE [dbo].[customers]
 (
     [id] INT NOT NULL,
     [first_name] NVARCHAR(100) NOT NULL,
@@ -21,7 +21,7 @@ CREATE TABLE [pass].[customers]
     UNIQUE NONCLUSTERED ([email] ASC)
 )
 
-CREATE TABLE [pass].[claims]
+CREATE TABLE [dbo].[claims]
 (
     [id] INT NOT NULL,
     [customer_id] int NOT NULL,
@@ -33,7 +33,7 @@ CREATE TABLE [pass].[claims]
 );
 GO
 
-CREATE TABLE [pass].[policies]
+CREATE TABLE [dbo].[policies]
 (
     [id] INT NOT NULL,
     [customer_id] int NOT NULL,
@@ -49,7 +49,7 @@ CREATE TABLE [pass].[policies]
 );
 GO
 
-CREATE TABLE [pass].[communication_history]
+CREATE TABLE [dbo].[communication_history]
 (
     [id] INT NOT NULL,
     [customer_id] int NOT NULL,

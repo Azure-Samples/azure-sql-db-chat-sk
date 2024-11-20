@@ -28,7 +28,7 @@ public class SearchSessionPlugin(Kernel kernel, ILogger logger, string connectio
         Query the database to find customer's data
         The high-level schema of the database is the following:
         
-        TABLE: [pass].[customers]
+        TABLE: [dbo].[customers]
         COLUMNS:
         [id]: internal customer id
         [first_name]: customer first name
@@ -49,9 +49,9 @@ public class SearchSessionPlugin(Kernel kernel, ILogger logger, string connectio
         The database schema is the following:
 
         // this table contains customer information
-        CREATE TABLE [pass].[customers]
+        CREATE TABLE [dbo].[customers]
         (
-            [id] INT DEFAULT (NEXT VALUE FOR [pass].[global_id]) NOT NULL,
+            [id] INT DEFAULT (NEXT VALUE FOR [dbo].[global_id]) NOT NULL,
             [first_name] NVARCHAR(100) NOT NULL,
             [last_name] NVARCHAR(100) NOT NULL,
             [address] NVARCHAR(100) NOT NULL,
@@ -95,7 +95,7 @@ public class SearchSessionPlugin(Kernel kernel, ILogger logger, string connectio
         Query the database to find claims data for customers
         The high-level schema of the database is the following:
         
-        TABLE: [pass].[claims]
+        TABLE: [dbo].[claims]
         COLUMNS:
         [id]: internal claim id
         [customer_id]: customer id
@@ -112,7 +112,7 @@ public class SearchSessionPlugin(Kernel kernel, ILogger logger, string connectio
         The database schema is the following:
 
         // this table contains customer's claims information
-        CREATE TABLE [pass].[claims]
+        CREATE TABLE [dbo].[claims]
         (
             [id] INT NOT NULL,
             [customer_id] int NOT NULL,
@@ -147,7 +147,7 @@ public class SearchSessionPlugin(Kernel kernel, ILogger logger, string connectio
         Query the database to find policies data for customers
         The high-level schema of the database is the following:
         
-        TABLE: [pass].[claims]
+        TABLE: [dbo].[claims]
         COLUMNS:
         [id]: internal claim id
         [customer_id]: customer id
@@ -168,7 +168,7 @@ public class SearchSessionPlugin(Kernel kernel, ILogger logger, string connectio
         The database schema is the following:
 
         // this table contains customer's policies information
-        CREATE TABLE [pass].[policies]
+        CREATE TABLE [dbo].[policies]
         (
             [id] INT NOT NULL,
             [customer_id] int NOT NULL,
@@ -212,7 +212,7 @@ public class SearchSessionPlugin(Kernel kernel, ILogger logger, string connectio
         DefaultTypeMap.MatchNamesWithUnderscores = true;
 
         await using var connection = new SqlConnection(connectionString);
-        var notes = await connection.QueryAsync<CommunicationHistory>("pass.find_communication_history_by_subject", 
+        var notes = await connection.QueryAsync<CommunicationHistory>("dbo.find_communication_history_by_subject", 
             new { 
                 customerId,
                 subject = subject ?? ""               

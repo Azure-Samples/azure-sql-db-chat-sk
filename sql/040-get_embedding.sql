@@ -1,4 +1,4 @@
-create or alter procedure [web].[get_embedding]
+create or alter procedure [dbo].[get_embedding]
 @inputText nvarchar(max),
 @embedding vector(1536) output
 as
