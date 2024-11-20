@@ -1,6 +1,8 @@
-CREATE OR ALTER PROCEDURE dbo.find_communication_history_by_subject @customerId INT, @subject NVARCHAR(MAX)
+CREATE OR ALTER PROCEDURE dbo.find_communication_history_by_subject 
+@customerId INT, 
+@subject NVARCHAR(MAX) = 'all'
 AS
-IF ((@subject IS NULL) OR (@subject =''))
+IF ((@subject IS NULL) OR (@subject =' ') OR (TRIM(LOWER(@subject)) = 'all'))
 BEGIN
 
     SELECT TOP(10)

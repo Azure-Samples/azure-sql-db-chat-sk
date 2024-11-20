@@ -40,9 +40,9 @@ public class SearchSessionPlugin(Kernel kernel, ILogger logger, string connectio
         [country]: customer home country
         [active-policies]: other type of policies the customer has (life, health, car, homeowners, etc)
         """)]
-    public async Task<IEnumerable<dynamic>> QueryCustomersTable(string query)
+    public async Task<IEnumerable<dynamic>> QueryCustomersTable(string logical_sql_query)
     {        
-        logger.LogInformation($"Querying the database for '{query}'");
+        logger.LogInformation($"Querying the database for '{logical_sql_query}'");
 
         var ai = kernel.GetRequiredService<IChatCompletionService>();
         var chat = new ChatHistory(@"You create T-SQL queries based on the given user request and the provided schema. Just return T-SQL query to be executed. Do not return other text or explanation. Don't use markdown or any wrappers.
@@ -72,7 +72,7 @@ public class SearchSessionPlugin(Kernel kernel, ILogger logger, string connectio
         details column must be cast to NVARCHAR(MAX) before using it in a query.
         ");
 
-        chat.AddUserMessage(query);
+        chat.AddUserMessage(logical_sql_query);
         var response = await ai.GetChatMessageContentAsync(chat);
         if (response.Content == null)
         {
@@ -103,9 +103,9 @@ public class SearchSessionPlugin(Kernel kernel, ILogger logger, string connectio
         [claim_date]: claim date
         [details]: details and notes about the claim added by the agent 
         """)]
-    public async Task<IEnumerable<dynamic>> QueryClaimsTable(string query)
+    public async Task<IEnumerable<dynamic>> QueryClaimsTable(string logical_sql_query)
     {        
-        logger.LogInformation($"Querying the database for '{query}'");
+        logger.LogInformation($"Querying the database for '{logical_sql_query}'");
 
         var ai = kernel.GetRequiredService<IChatCompletionService>();
         var chat = new ChatHistory(@"You create T-SQL queries based on the given user request and the provided schema. Just return T-SQL query to be executed. Do not return other text or explanation. Don't use markdown or any wrappers.
@@ -124,7 +124,7 @@ public class SearchSessionPlugin(Kernel kernel, ILogger logger, string connectio
         );
         ");
 
-        chat.AddUserMessage(query);
+        chat.AddUserMessage(logical_sql_query);
         var response = await ai.GetChatMessageContentAsync(chat);
         if (response.Content == null)
         {
@@ -159,9 +159,9 @@ public class SearchSessionPlugin(Kernel kernel, ILogger logger, string connectio
         [payment_amount]: payment amount
         [additional_notes]: details and notes about the policy and payment status
         """)]
-    public async Task<IEnumerable<dynamic>> QueryPoliciesTable(string query)
+    public async Task<IEnumerable<dynamic>> QueryPoliciesTable(string logical_sql_query)
     {        
-        logger.LogInformation($"Querying the database for '{query}'");
+        logger.LogInformation($"Querying the database for '{logical_sql_query}'");
 
         var ai = kernel.GetRequiredService<IChatCompletionService>();
         var chat = new ChatHistory(@"You create T-SQL queries based on the given user request and the provided schema. Just return T-SQL query to be executed. Do not return other text or explanation. Don't use markdown or any wrappers.
@@ -185,7 +185,7 @@ public class SearchSessionPlugin(Kernel kernel, ILogger logger, string connectio
 
         ");
 
-        chat.AddUserMessage(query);
+        chat.AddUserMessage(logical_sql_query);
         var response = await ai.GetChatMessageContentAsync(chat);
         if (response.Content == null)
         {

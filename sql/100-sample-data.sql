@@ -1,7 +1,12 @@
+DELETE FROM [dbo].[communication_history]
+DELETE FROM [dbo].[policies]
+DELETE FROM [dbo].[claims] 
+DELETE FROM [dbo].[customers]
+GO
 
 INSERT INTO [dbo].[customers] ([id], [first_name], [last_name], [address], [city], [state], [zip], [country], [email], [details])
 VALUES 
-(1539726, 'John', 'Doe', '123 Old Road', 'Bellevue', 'WA', '98007', 'USA', 'johndoe@contoso.com', '{}"active-policies": ["car", "renters"]}'),
+(1539726, 'John', 'Doe', '123 Old Road', 'Bellevue', 'WA', '98007', 'USA', 'johndoe@contoso.com', '{"active-policies": ["car", "renters"]}'),
 (920411, 'John', 'Doe', '456 Main St', 'Redmond', 'WA', '98052', 'USA', 'jd@adventureworks.com', '{"active-policies": ["umbrella", "car", "homeowners"]}'),
 (290332, 'John', 'Doe', '789 Lake Road', 'Kirkland', 'WA', '98017', 'USA', 'johnd2@contoso.com', '{"active-policies": ["car", "boat"]}')
 go
@@ -51,8 +56,13 @@ CLOSE C;
 DEALLOCATE C;
 go
 
+/*
 EXEC dbo.find_communication_history_by_subject 920411, 'premium increase'
 GO
 
 EXEC dbo.find_communication_history_by_subject 920411, 'car insurance details'
 GO
+
+EXEC dbo.find_communication_history_by_subject 920411, ''
+GO
+*/

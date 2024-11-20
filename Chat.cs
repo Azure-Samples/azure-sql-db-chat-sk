@@ -43,7 +43,7 @@ public class ChatBot
 
         var table = new Table();    
         table.Expand();      
-        table.AddColumn(new TableColumn("[bold]Insurance Agent Assistant[/] v1.892 rev2 #c8e12f").Centered());       
+        table.AddColumn(new TableColumn("[bold]Insurance Agent Assistant[/] v2.000").Centered());       
         AnsiConsole.Write(table);
 
         //AnsiConsole.WriteLine($"azureOpenAIEndpoint: {azureOpenAIEndpoint}, embeddingModelDeploymentName: {embeddingModelDeploymentName}, chatModelDeploymentName: {chatModelDeploymentName}, sqlTableName: {sqlTableName}");
@@ -62,7 +62,7 @@ public class ChatBot
             var sc = new ServiceCollection();
             sc.AddAzureOpenAIChatCompletion(chatModelDeploymentName, azureOpenAIEndpoint, azureOpenAIApiKey);
             sc.AddKernel();
-            sc.AddLogging(b => b.AddSimpleConsole(o => { o.ColorBehavior = LoggerColorBehavior.Enabled; }).SetMinimumLevel(LogLevel.None));
+            sc.AddLogging(b => b.AddSimpleConsole(o => { o.ColorBehavior = LoggerColorBehavior.Enabled; }).SetMinimumLevel(LogLevel.Debug));
             var services = sc.BuildServiceProvider();
             var logger = services.GetRequiredService<ILogger<Program>>();
             var memory = new MemoryBuilder()
@@ -139,7 +139,7 @@ public class ChatBot
 
                 logger.LogDebug("Searching information from the memory...");                
                 builder.Clear();
-                await foreach (var result in memory.SearchAsync(sqlTableName, question, limit: 3, minRelevanceScore: 0.3))
+                await foreach (var result in memory.SearchAsync(sqlTableName, question, limit: 3, minRelevanceScore: 0.35))
                 {
                     builder.AppendLine(result.Metadata.Text);
                 }
