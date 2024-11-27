@@ -68,7 +68,7 @@ public class SearchSessionPlugin(Kernel kernel, ILogger logger, string connectio
         active-policies: [string...string] other type of policies the customer has (life, health, car, homeowners, etc)
 
         make sure to use JSON_QUERY when querying or filtering a JSON array or a JSON object.
-
+        make sure to use double quotes when querying active-policies. For example use ""active-policies"" when trying to access that property in the json document.
         details column must be cast to NVARCHAR(MAX) before using it in a query.
         ");
 
