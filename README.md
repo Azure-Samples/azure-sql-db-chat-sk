@@ -1,6 +1,8 @@
-# Azure SQL Chat with your data BOT
+# Azure SQL Chat with your data (RAG, NL2SQL, Semantic Kernel, Agentic RAG)
 
 This is a simple example of a chatbot that uses Azure SQL to store and retrieve data using both RAG and Natural-Language-to-SQL (NL2QL) to allow chat on both structured and non-structured data. The bot is built using the Microsoft Semantic Kernel Framework and the newly added support for vectors in Azure SQL.
+
+This repo has been discussed on #DataExposed too: https://www.youtube.com/watch?v=HAu2APLuj_8&list=PLlrxD0HtieHieV7Jls72yFPSKyGqycbZR
 
 > [!NOTE]
 > If you are looking for the sample using *insurance* data, please use the `insurance-chatbot-demo` branch. 
