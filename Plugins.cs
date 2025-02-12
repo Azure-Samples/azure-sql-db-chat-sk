@@ -108,7 +108,7 @@ public class SearchSessionPlugin(Kernel kernel, ILogger logger, string connectio
         logger.LogInformation($"Querying the database for '{logical_sql_query}'");
 
         var ai = kernel.GetRequiredService<IChatCompletionService>();
-        var chat = new ChatHistory(@"You create T-SQL queries based on the given user request and the provided schema. Just return T-SQL query to be executed. Do not return other text or explanation. Don't use markdown or any wrappers.
+        var chat = new ChatHistory(@"You create T-SQL queries based on the given user request and the provided schema. Just return T-SQL query to be executed. Do not return other text or explanation. Don't use markdown or any wrappers.     
         The database schema is the following:
 
         // this table contains customer's claims information

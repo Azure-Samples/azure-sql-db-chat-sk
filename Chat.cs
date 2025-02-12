@@ -62,7 +62,7 @@ public class ChatBot
             var sc = new ServiceCollection();
             sc.AddAzureOpenAIChatCompletion(chatModelDeploymentName, azureOpenAIEndpoint, azureOpenAIApiKey);
             sc.AddKernel();
-            sc.AddLogging(b => b.AddSimpleConsole(o => { o.ColorBehavior = LoggerColorBehavior.Enabled; }).SetMinimumLevel(LogLevel.None));
+            sc.AddLogging(b => b.AddSimpleConsole(o => { o.ColorBehavior = LoggerColorBehavior.Enabled; }).SetMinimumLevel(LogLevel.Debug));
             var services = sc.BuildServiceProvider();
             var logger = services.GetRequiredService<ILogger<Program>>();
             var memory = new MemoryBuilder()
@@ -95,6 +95,8 @@ public class ChatBot
                 monitor their driving habits and provide discounts based on their driving score.
             """, "memory-1");                
             
+            AnsiConsole.WriteLine("Done!");
+
             return (logger, kernel, memory, ai);
         });
 
