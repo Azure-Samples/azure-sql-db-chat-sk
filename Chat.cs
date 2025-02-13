@@ -43,7 +43,7 @@ public class ChatBot
 
         var table = new Table();    
         table.Expand();      
-        table.AddColumn(new TableColumn("[bold]Insurance Agent Assistant[/] v2.000").Centered());       
+        table.AddColumn(new TableColumn("[bold]Insurance Agent Assistant[/] v2.100").Centered());       
         AnsiConsole.Write(table);
 
         //AnsiConsole.WriteLine($"azureOpenAIEndpoint: {azureOpenAIEndpoint}, embeddingModelDeploymentName: {embeddingModelDeploymentName}, chatModelDeploymentName: {chatModelDeploymentName}, sqlTableName: {sqlTableName}");
