@@ -36,7 +36,7 @@ public class ChatBot
         sqlTableName = Env.GetString("MSSQL_TABLE_NAME") ?? "ChatMemories";
     }
 
-    public async Task RunAsync()
+    public async Task RunAsync(bool enableDebug = false)
     {
         AnsiConsole.Clear();
         AnsiConsole.Foreground = Color.Green;
@@ -62,7 +62,7 @@ public class ChatBot
             var sc = new ServiceCollection();
             sc.AddAzureOpenAIChatCompletion(chatModelDeploymentName, azureOpenAIEndpoint, azureOpenAIApiKey);
             sc.AddKernel();
-            sc.AddLogging(b => b.AddSimpleConsole(o => { o.ColorBehavior = LoggerColorBehavior.Enabled; }).SetMinimumLevel(LogLevel.Debug));
+            sc.AddLogging(b => b.AddSimpleConsole(o => { o.ColorBehavior = LoggerColorBehavior.Enabled; }).SetMinimumLevel(enableDebug ? LogLevel.Debug : LogLevel.None));
             var services = sc.BuildServiceProvider();
             var logger = services.GetRequiredService<ILogger<Program>>();
             var memory = new MemoryBuilder()
@@ -85,7 +85,7 @@ public class ChatBot
                     
             AnsiConsole.WriteLine("Initializing plugins...");
             var kernel = services.GetRequiredService<Kernel>();
-            kernel.Plugins.AddFromObject(new SearchSessionPlugin(kernel, logger, sqlConnectionString));
+            kernel.Plugins.AddFromObject(new SearchSessionPlugin(kernel, memory, logger, sqlConnectionString));
             var ai = kernel.GetRequiredService<IChatCompletionService>();
             
             AnsiConsole.WriteLine("Initializing long-term memory...");

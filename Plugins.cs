@@ -6,6 +6,10 @@ using Dapper;
 using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
+using Microsoft.SemanticKernel.Memory;
+using DotNetEnv;
+
+#pragma warning disable SKEXP0001
 
 namespace azure_sql_sk;
 
@@ -17,10 +21,11 @@ public class CommunicationHistory {
     public required string Details { get; set; }
 }
 
-public class SearchSessionPlugin(Kernel kernel, ILogger logger, string connectionString)
+public class SearchSessionPlugin(Kernel kernel, ISemanticTextMemory memory, ILogger logger, string connectionString)
 {   
     private readonly ILogger logger = logger;
     private readonly Kernel kernel = kernel;    
+    private readonly ISemanticTextMemory memory = memory;
     private readonly string connectionString = connectionString;
 
     [KernelFunction("query_customers_table")]
@@ -222,4 +227,30 @@ public class SearchSessionPlugin(Kernel kernel, ILogger logger, string connectio
                      
         return notes;    
     }
+
+    // [KernelFunction("store_memory_for_customer")]
+    // [Description("Store a new memory in the agent memory for a specific customer")]
+    // public async void StoreMemory(int customerId, string memoryContent)
+    // {
+    //     logger.LogInformation($"Storing memory for Customer '{customerId}', Memory: '{memoryContent}'");
+
+    //     var sqlTableName = Env.GetString("MSSQL_TABLE_NAME") ?? "ChatMemories";
+    //     await memory.SaveInformationAsync(sqlTableName, $"Customer Id:{customerId} - ", memoryContent, Guid.NewGuid().ToString(), additionalMetadata: $"CustomerId:{customerId}");        
+    // }
+
+    // [KernelFunction("retrieve_memory_for_customer")]
+    // [Description("Search for memories about a specific customer")]
+    // public async Task<IEnumerable<string>> SearchMemory(int customerId, string searchText)
+    // {
+    //     logger.LogInformation($"Querying memories for Customer '{customerId}', Search Query: '{searchText}'");
+        
+    //     var sqlTableName = Env.GetString("MSSQL_TABLE_NAME") ?? "ChatMemories";
+    //     var results = new List<string>();
+    //     await foreach (var result in memory.SearchAsync(sqlTableName, searchText, limit: 3, minRelevanceScore: 0.35))
+    //     {
+    //         if (result.Metadata.AdditionalMetadata == $"CustomerID:{customerId}")
+    //             results.Add(result.Metadata.Text);           
+    //     }
+    //     return results;
+    // }
 }
