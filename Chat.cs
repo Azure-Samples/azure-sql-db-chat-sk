@@ -89,9 +89,9 @@ public class ChatBot
             var ai = kernel.GetRequiredService<IChatCompletionService>();
             
             AnsiConsole.WriteLine("Initializing long-term memory...");
-            await memory.SaveInformationAsync(sqlTableName, "Premium for car insurance have been increased by 15% starting from Septmber 2024", "policy-price-increase");        
+            await memory.SaveInformationAsync(sqlTableName, "Premium for car insurance have been increased by 15% starting from September 2024", "policy-price-increase");        
             await memory.SaveInformationAsync(sqlTableName, """
-                Customers can reduce there premium by subscribing to the "Safety Score" program which will 
+                Customers can reduce their premium by subscribing to the "Safety Score" program which will 
                 monitor their driving habits and provide discounts based on their driving score.
             """, "memory-1");                
             
@@ -101,7 +101,7 @@ public class ChatBot
         });
 
         AnsiConsole.WriteLine("Ready to chat! Hit 'ctrl-c' to quit.");
-        var chat = new ChatHistory($"You are an AI assistant that helps insurance agents to find information on customers data and status. Use a professional tone when aswering and provide a summary of data instead of lists. If users ask about topics you don't know, answer that you don't know. Today's date is {DateTime.Now:yyyy-MM-dd}. Query the database at every user request, even if information is available in chat history, to make sure you always have the latest information.");    
+        var chat = new ChatHistory($"You are an AI assistant that helps insurance agents to find information on customers data and status. Use a professional tone when answering and provide a summary of data instead of lists. If users ask about topics you don't know, answer that you don't know. Today's date is {DateTime.Now:yyyy-MM-dd}. Query the database at every user request, even if information is available in chat history, to make sure you always have the latest information.");    
         var builder = new StringBuilder();
         while (true)
         {            
