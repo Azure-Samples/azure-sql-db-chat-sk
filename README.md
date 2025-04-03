@@ -98,13 +98,19 @@ Example of `appsettings.Development.json`:
 To deploy the database objects and sample data, you can use the console application. This will create the necessary tables and insert some sample data into the database.
 The console application uses the `MSSQL_CONNECTION_STRING` and `MSSQL_TABLE_NAME` settings from the `.env` file to connect to the Azure SQL database and create the necessary tables. Make sure you have created the `.env` file as explained above.
 
-1. Navigate to the console project directory:
+1. Sign in to Azure using the Azure CLI:
+
+   ```bash
+   az login
+   ```
+
+2. Navigate to the console project directory:
 
    ```bash
    cd AzureSqlSk.Console
    ```
 
-2. Run the deployment command:
+3. Run the deployment command:
 
    ```bash
    dotnet run deploy
@@ -120,13 +126,19 @@ This solution uses [.NET Aspire](https://learn.microsoft.com/dotnet/aspire/get-s
 
 Make sure you have created the `appsettings.Development.json` file in the `AzureSqlSk.Api` directory as explained above.
 
-1. Navigate to the Aspire host project:
+1. Sign in to Azure using the Azure CLI:
+
+   ```bash
+   az login
+   ```
+
+2. Navigate to the Aspire host project:
 
    ```bash
    cd AzureSqlSk.AppHost
    ```
 
-2. Run the application:
+3. Run the application:
 
    ```bash
    dotnet run
@@ -224,18 +236,32 @@ If you prefer to use the console application for testing, you can run the chat a
 
 ## Development in GitHub Codespaces
 
-This project includes DevContainer configuration for development in GitHub Codespaces. The container includes:
+A GitHub Codespace is a development environment that is hosted in the cloud that you access via a browser. All of the pre-requisite developer tools are pre-installed and available in the codespace.
 
 - .NET 8.0 SDK
 - Node.js 18.x
 - Required VS Code extensions
 - Development tools and utilities
 
+You must have a GitHub account to use GitHub Codespaces. If you do not have a GitHub account, you can [Sign Up Here](https://github.com/signup)!
+
+GitHub Codespaces is available for developers in every organization. All personal GitHub.com accounts include a monthly quota of free usage each month. GitHub will provide users in the Free plan 120 core hours, or 60 hours of run time on a 2 core codespace, plus 15 GB of storage each month.
+
+You can see your balance of available codespace hours on the [GitHub billing page](https://github.com/settings/billing/summary).
+
 To use GitHub Codespaces:
 
-1. Open this repository in GitHub Codespaces
-2. The DevContainer will automatically build and configure the environment
-3. Run the application using the Aspire host project as described above
+1. Within this GitHub repo, select the green "Code" button. Then select "Codespaces". Finally, select the "Create codespace on [the current branch]" button.
+2. The DevContainer will automatically build and configure the environment.
+3. Follow the instructions above to configure the console application and the API application.
+4. In VS Code, open the integrated terminal and sign in to Azure using the command:
+
+   ```bash
+   az login
+   ```
+
+5. Deploy the database objects and sample data using the console application. This will create the necessary tables and insert some sample data into the database.
+6. Run the application using the Aspire host project as described above.
 
 ## F.A.Q.
 
