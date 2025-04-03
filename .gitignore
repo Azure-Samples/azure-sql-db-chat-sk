@@ -16,6 +16,9 @@
 # Mono auto generated files
 mono_crash.*
 
+# Ignore appsettings.Developmentljson files
+appsettings.Development.json
+
 # Build results
 [Dd]ebug/
 [Dd]ebugPublic/

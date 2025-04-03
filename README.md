@@ -1,77 +1,106 @@
-# Azure SQL Chat with your data - Insurance Sample
+# Azure SQL Chat with Semantic Kernel
 
-This is a simple example of a chatbot that uses Azure SQL to store and retrieve data using both RAG and Natural-Language-to-SQL (NL2QL) to allow chat on both structured and non-structured data. The bot is built using the Microsoft Semantic Kernel Framework and the newly added support for vectors in Azure SQL.
+This project demonstrates a chat application that uses Azure OpenAI and Azure SQL Database to answer questions about data. The application is built using:
 
+- ASP.NET Core Web API for the backend
+- Vue.js for the frontend
+- .NET Aspire for orchestration
+- Semantic Kernel for AI integration
+- Azure SQL Database for data storage
 
-## Architecture
+## Prerequisites
 
-![Architecture](./_assets/azure-sql-sk-bot.png)
+- .NET 8.0 SDK
+- Node.js 18.x or later
+- Azure OpenAI API key
+- Azure SQL Database connection string
 
-## Solution
+## Project Structure
 
-The solution is composed of three main Azure components:
+- `AzureSqlSk.Api` - ASP.NET Core Web API project containing the chat and Semantic Kernel logic
+- `AzureSqlSk.Web` - Vue.js frontend project with a modern chat interface
+- `AzureSqlSk.Shared` - Shared library containing common models and interfaces
+- `AzureSqlSk.AppHost` - .NET Aspire host project that orchestrates the API and frontend
 
-- [Azure SQL Database](https://learn.microsoft.com/en-us/azure/azure-sql/database/sql-database-paas-overview?view=azuresql): The database that stores the data.
-- [Azure Open AI](https://learn.microsoft.com/azure/ai-services/openai/): The language model that generates the text and the embeddings.
-- [Semantic Kernel](https://learn.microsoft.com/en-us/semantic-kernel/overview/): The library used to orchestrate calls to LLM to do RAG and NL2SQL and to store long-term memories in the database.
+## Configuration
 
-### Azure Open AI
+1. Copy `.env.sample` to `.env` and update the following values:
+   ```
+   OPENAI_API_KEY=your_azure_openai_api_key
+   OPENAI_MODEL_ID=gpt-4
+   SQL_SERVER_CONNECTION_STRING=your_azure_sql_connection_string
+   ```
 
-Make sure to have two models deployed, one for generating embeddings (*text-embedding-3-small* model recommended) and one for handling the chat (*gpt-4 turbo* recommended). You can use the Azure OpenAI service to deploy the models. Make sure to have the endpoint and the API key ready. The two models are assumed to be deployed with the following names:
+## Running the Application
 
-- Embedding model: `text-embedding-3-small`
-- Chat model: `gpt-4`
+### Using .NET Aspire (Recommended)
 
-### Configure environment 
+1. Navigate to the Aspire host project:
+   ```bash
+   cd AzureSqlSk.AppHost
+   ```
 
-Create a `.env` file starting from the `.env.sample` file:
+2. Run the application:
+   ```bash
+   dotnet run
+   ```
 
-- `OPENAI_URL`: specify the URL of your Azure OpenAI endpoint, eg: 'https://my-open-ai.openai.azure.com/'
-- `OPENAI_KEY`: specify the API key of your Azure OpenAI endpoint
-- `OPENAI_MODEL`: specify the deployment name of your Azure OpenAI embedding endpoint, eg: 'text-embedding-3-small'
+This will start both the API and frontend applications. The frontend will be available at `http://localhost:5173` and the API at `http://localhost:5000`.
 
-- `MSSQL`: the connection string to the Azure SQL database where you want to deploy the database objects and sample data
-- `MSSQL_TABLE_NAME`: the name of the table where the chatbot will store long-term memories
+### Running Components Individually
 
-### Database
+#### API
 
-> [!NOTE]  
-> Vector Functions are in Early Adopter Preview. Get access to the preview via https://aka.ms/azuresql-vector-eap-announcement
+1. Navigate to the API project:
+   ```bash
+   cd AzureSqlSk.Api
+   ```
 
-To deploy the database, you can just use the `deploy` option of the chatbot application. Make sure you have created the `.env` file as explained in the previoud section, and then run the following command:
+2. Run the API:
+   ```bash
+   dotnet run
+   ```
 
-```bash
-dotnet run deploy
-```
+#### Frontend
 
-That will connect to Azure SQL and deploy the needed database objects and some sample data.
+1. Navigate to the frontend project:
+   ```bash
+   cd AzureSqlSk.Web
+   ```
 
-## Application
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-To run the application, make sure you have created the `.env` file and deployed the database as explained in the previous section, and then run the following command:
+3. Start the development server:
+   ```bash
+   npm run dev
+   ```
 
-```bash
-dotnet run chat
-```
+## Development in GitHub Codespaces
 
-The chatbot will start and you can start chatting with it. Use the `/ch` command to clear the chat history and `/h` to see the chat history. End the chat with `ctrl-c`.
+This project includes DevContainer configuration for development in GitHub Codespaces. The container includes:
 
-The prompt will look like this:
+- .NET 8.0 SDK
+- Node.js 18.x
+- Required VS Code extensions
+- Development tools and utilities
 
-```bash 
-(H: 1) Question: 
-```
+To use GitHub Codespaces:
 
-`H` indicates the chat memory size. The chatbot will remember the last `H` interactions. 
+1. Open this repository in GitHub Codespaces
+2. The DevContainer will automatically build and configure the environment
+3. Run the application using the Aspire host project as described above
 
-You can now start to chat with your own data. Have fun!
+## Deployment
 
-## F.A.Q.
+The application can be deployed to Azure using the provided deployment scripts. See the deployment documentation for more details.
 
-### How can I quickly generate the embeddings for my data already stored in Azure SQL?
+## Contributing
 
-Take a look at the Azure SQL Vectorizer repository: 
+Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
 
-https://github.com/Azure-Samples/azure-sql-db-vectorizer
+## License
 
-It does exactly what you are looking for.
+This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
