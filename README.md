@@ -144,6 +144,12 @@ Make sure you have created the `appsettings.Development.json` file in the `Azure
    dotnet run
    ```
 
+> [!NOTE]
+> If you encounter certificate errors, such as "The remote certificate is invalid because of errors in the certificate chain: UntrustedRoot", execute the following command to trust the development certificate:
+>
+> `dotnet dev-certs https --trust`
+
+
 This will start both the API and frontend applications and launch the .NET Aspire dashboard.
 
 The console output will show a URL for the Aspire dashboard, containing a unique login token. You can use this token to access the dashboard. The output will look something like this:
@@ -260,8 +266,14 @@ To use GitHub Codespaces:
    az login
    ```
 
-5. Deploy the database objects and sample data using the console application. This will create the necessary tables and insert some sample data into the database.
-6. Run the application using the Aspire host project as described above.
+5. Run the following command to trust the development certificate:
+
+   ```bash
+   dotnet dev-certs https --trust
+   ```
+
+6. Deploy the database objects and sample data using the console application. This will create the necessary tables and insert some sample data into the database.
+7. Run the application using the Aspire host project as described above.
 
 ## F.A.Q.
 
