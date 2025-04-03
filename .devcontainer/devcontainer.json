@@ -1,0 +1,19 @@
+{
+    "name": "Azure SQL SK Development",
+    "dockerFile": "Dockerfile",
+    "forwardPorts": [5000, 5001, 5173],
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-dotnettools.csharp",
+                "ms-dotnettools.dotnet-interactive-vscode",
+                "Vue.volar",
+                "dbaeumer.vscode-eslint",
+                "esbenp.prettier-vscode",
+                "ms-azuretools.vscode-docker"
+            ]
+        }
+    },
+    "postCreateCommand": "dotnet restore && cd AzureSqlSk.Web && npm install",
+    "remoteUser": "vscode"
+} 
