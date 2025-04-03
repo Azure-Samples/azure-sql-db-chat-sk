@@ -185,6 +185,7 @@ Here is a series of sample prompts you can try:
 - Have there been increases to this customer's insurance premiums lately?
 - In what ways can this customer save money on their insurance premiums?
 - Show me this customer's policies
+- (and just for fun) Write me a poem about this customer
 
 Notice that, owing to the chat history, the bot will remember the context of the conversation and will be able to provide more relevant answers based on the previous messages. For example, if you ask about a specific customer, the bot will remember that you are referring to that customer in subsequent messages.
 
