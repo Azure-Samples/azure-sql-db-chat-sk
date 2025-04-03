@@ -21,19 +21,52 @@ This project demonstrates a chat application that uses Azure OpenAI and Azure SQ
 - `AzureSqlSk.Web` - Vue.js frontend project with a modern chat interface
 - `AzureSqlSk.Shared` - Shared library containing common models and interfaces
 - `AzureSqlSk.AppHost` - .NET Aspire host project that orchestrates the API and frontend
+- `AzureSqlSk.Console` - Console application for database deployment and chat interaction
 
 ## Configuration
 
-1. Copy `.env.sample` to `.env` and update the following values:
+### Console Application
+
+1. Copy `.env.sample` to `.env` in the `AzureSqlSk.Console` directory and update the following values:
    ```
    OPENAI_API_KEY=your_azure_openai_api_key
    OPENAI_MODEL_ID=gpt-4
    SQL_SERVER_CONNECTION_STRING=your_azure_sql_connection_string
    ```
 
+### API Application
+
+1. Copy `appsettings.Development.Sample.json` to `appsettings.Development.json` in the `AzureSqlSk.Api` directory
+2. Update the following values in `appsettings.Development.json`:
+   ```json
+   {
+     "AzureOpenAI": {
+       "ApiKey": "your_azure_openai_api_key",
+       "ModelId": "gpt-4"
+     },
+     "ConnectionStrings": {
+       "DefaultConnection": "your_azure_sql_connection_string"
+     }
+   }
+   ```
+
+## Database Deployment
+
+1. Navigate to the console project directory:
+   ```bash
+   cd AzureSqlSk.Console
+   ```
+
+2. Run the deployment command:
+   ```bash
+   dotnet run deploy
+   ```
+
+This will create the necessary database tables and initial data.
+
 ## Running the Application
 
-### Using .NET Aspire (Recommended)
+### Web Interface (Recommended)
 
 1. Navigate to the Aspire host project:
    ```bash
@@ -46,6 +79,18 @@ This project demonstrates a chat application that uses Azure OpenAI and Azure SQ
    ```
 
 This will start both the API and frontend applications. The frontend will be available at `http://localhost:5173` and the API at `http://localhost:5000`.
+
+### Console Interface
+
+1. Navigate to the console project directory:
+   ```bash
+   cd AzureSqlSk.Console
+   ```
+
+2. Run the chat application:
+   ```bash
+   dotnet run chat
+   ```
 
 ### Running Components Individually
 
