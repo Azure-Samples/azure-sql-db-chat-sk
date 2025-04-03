@@ -1,0 +1,6 @@
+@AzureSqlSk.Api_HostAddress = http://localhost:5132
+
+GET {{AzureSqlSk.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
