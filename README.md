@@ -151,6 +151,25 @@ To view the web interface, select the `web` link in the Aspire dashboard. This w
 
 ![The Aspire dashboard is displayed with the endpoint for the web frontend highlighted.](./_assets/aspire-dashboard.png)
 
+The web interface is a modern chat application that allows you to interact with the bot. You can type your questions in the input box and click the "Send" button to send your message to the bot. The bot will respond with an answer based on the data stored in the Azure SQL database. The API will handle the requests and responses between the frontend and the backend. The Semantic Kernel layer will orchestrate the calls to the Azure OpenAI service and the Azure SQL database to generate the responses.
+
+As you interact with the bot, it will keep an in-memory cache of the conversation context. This allows the bot to remember previous messages and provide more relevant responses based on the context of the conversation. At any time, you can select **View History** in the top right corner of the chat window to see the conversation history. This will show you all the messages exchanged between you and the bot, including system and tool messages. Use the **Clear History** button to clear the conversation history and start a new chat.
+
+![The web interface is displayed with user and bot messages.](./_assets/web-interface.png)
+
+Here is a series of sample prompts you can try:
+
+- Show me a list of customers and their IDs, plus any other relevant information
+- What claims are there for March 2021?
+- What claims does customer 920411 have?
+- Do you have any communication history for this customer?
+- Overall, is this a happy customer, or do we need to do some work to make them happy?
+- Have there been increases to this customer's insurance premiums lately?
+- In what ways can this customer save money on their insurance premiums?
+- Show me this customer's policies
+
+Notice that, owing to the chat history, the bot will remember the context of the conversation and will be able to provide more relevant answers based on the previous messages. For example, if you ask about a specific customer, the bot will remember that you are referring to that customer in subsequent messages.
+
 ### Console Interface
 
 If you prefer to use the console application for testing, you can run the chat application directly from the console. This is useful for debugging or if you want to test the bot without using the web interface.
