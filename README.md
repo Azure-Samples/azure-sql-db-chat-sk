@@ -149,7 +149,7 @@ The dashboard will show the status of the running applications and provide links
 
 To view the web interface, select the `web` link in the Aspire dashboard. This will open the chat interface in a new browser tab:
 
-![The Aspire dashboard is displayed with the endpoint for the web frontend highlighted.](media/aspire-dashboard.png)
+![The Aspire dashboard is displayed with the endpoint for the web frontend highlighted.](./_assets/aspire-dashboard.png)
 
 ### Console Interface
 
