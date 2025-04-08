@@ -1,6 +1,10 @@
 @AzureSqlSk.Api_HostAddress = http://localhost:5132
 
-GET {{AzureSqlSk.Api_HostAddress}}/weatherforecast/
+POST {{AzureSqlSk.Api_HostAddress}}/api/chat/chat
 Accept: application/json
+Content-Type: application/json
+{
+  "message": "Show me a list of customers and their IDs, plus any other relevant information"
+}
 
 ###
