@@ -55,19 +55,15 @@ builder.Services.AddSingleton<ISemanticTextMemory>(sp =>
     return new MemoryBuilder()
         .WithSqlServerMemoryStore(sqlConfig.ConnectionString)
         .WithTextEmbeddingGeneration(
-            (loggerFactory, httpClient) =>
-            {
-                return new AzureOpenAITextEmbeddingGenerationService(
-                    azureOpenAIConfig.EmbeddingDeploymentName,
-                    azureOpenAIConfig.Endpoint,
-                    azureOpenAIConfig.ApiKey,
-                    modelId: null,
-                    httpClient: httpClient,
-                    loggerFactory: loggerFactory,
-                    dimensions: 1536
-                );
-            }
-        )
+            (loggerFactory, httpClient) => new AzureOpenAITextEmbeddingGenerationService(
+                azureOpenAIConfig.EmbeddingDeploymentName,
+                azureOpenAIConfig.Endpoint,
+                azureOpenAIConfig.ApiKey,
+                modelId: null,
+                httpClient: httpClient,
+                loggerFactory: loggerFactory
+                //dimensions: 1536 // If you are using a text-embedding-3-small or large model, uncomment this line.
+            ))
         .Build();
 });
 

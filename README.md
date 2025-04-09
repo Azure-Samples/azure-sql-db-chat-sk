@@ -25,9 +25,9 @@ The solution is composed of three main Azure components:
 
 ### Azure Open AI
 
-Make sure to have two models deployed, one for generating embeddings (*text-embedding-3-small* model recommended) and one for handling the chat (*gpt-4o* recommended). You can use the Azure OpenAI service to deploy the models. Make sure to have the endpoint and the API key ready. The two models are assumed to be deployed with the following names:
+Make sure to have two models deployed, one for generating embeddings (*text-embedding-ada-002* model recommended) and one for handling the chat (*gpt-4o* recommended). You can use the Azure OpenAI service to deploy the models. Make sure to have the endpoint and the API key ready. The two models are assumed to be deployed with the following names:
 
-- Embedding model: `text-embedding-3-small`
+- Embedding model: `text-embedding-ada-002`
 - Chat model: `gpt-4o`
 
 ## Prerequisites
@@ -50,7 +50,7 @@ Copy `.env.sample` to `.env` in the `AzureSqlSk.Console` directory and update th
 
 - `OPENAI_URL`: specify the URL of your Azure OpenAI endpoint, eg: 'https://my-open-ai.openai.azure.com/'
 - `OPENAI_KEY`: specify the API key of your Azure OpenAI endpoint
-- `OPENAI_EMBEDDING_DEPLOYMENT_NAME`: specify the deployment name of your Azure OpenAI embedding endpoint, eg: 'text-embedding-3-small'
+- `OPENAI_EMBEDDING_DEPLOYMENT_NAME`: specify the deployment name of your Azure OpenAI embedding endpoint, eg: 'text-embedding-ada-002'
 - `OPENAI_CHAT_DEPLOYMENT_NAME`: specify the deployment name of your Azure OpenAI chat endpoint, eg: 'gpt-4o'
 
 - `MSSQL_CONNECTION_STRING`: the connection string to the Azure SQL database where you want to deploy the database objects and sample data
@@ -64,7 +64,7 @@ Copy `appsettings.Development.Sample.json` to `appsettings.Development.json` in 
 
 - `AzureOpenAI:Endpoint`: specify the URL of your Azure OpenAI endpoint, eg: 'https://my-open-ai.openai.azure.com/'
 - `AzureOpenAI:ApiKey`: specify the API key of your Azure OpenAI endpoint
-- `AzureOpenAI:EmbeddingDeploymentName`: specify the deployment name of your Azure OpenAI embedding endpoint, eg: 'text-embedding-3-small'
+- `AzureOpenAI:EmbeddingDeploymentName`: specify the deployment name of your Azure OpenAI embedding endpoint, eg: 'text-embedding-ada-002'
 - `AzureOpenAI:ChatDeploymentName`: specify the deployment name of your Azure OpenAI chat endpoint, eg: 'gpt-4o'
 - `SqlServer:ConnectionString`: the connection string to the Azure SQL database where you want to store the long-term memories
 - `SqlServer:TableName`: the name of the table where the chatbot will store long-term memories (default value is 'ChatMemories')
@@ -83,7 +83,7 @@ Example of `appsettings.Development.json`:
   "AzureOpenAI": {
     "Endpoint": "https://my-open-ai.openai.azure.com/",
     "ApiKey": "",
-    "EmbeddingDeploymentName": "text-embedding-3-small",
+    "EmbeddingDeploymentName": "text-embedding-ada-002",
     "ChatDeploymentName": "gpt-4o"
   },
   "SqlServer": {
