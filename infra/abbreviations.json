@@ -1,0 +1,11 @@
+{
+    "insightsComponents": "appi-",
+    "managedIdentityUserAssignedIdentities": "id-",
+    "openAiAccounts": "openai-",
+    "operationalInsightsWorkspaces": "log-",
+    "resourcesResourceGroups": "rg-",
+    "sqlServers": "sql-",
+    "sqlServersDatabases": "sqldb-",
+    "storageStorageAccounts": "st",
+    "webServerFarms": "plan-"
+}
