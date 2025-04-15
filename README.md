@@ -2,7 +2,6 @@
 
 This is a simple example of a chatbot that uses Azure SQL to store and retrieve data using both RAG and Natural-Language-to-SQL (NL2QL) to allow chat on both structured and non-structured data. The bot is built using the Microsoft Semantic Kernel Framework and the newly added support for vectors in Azure SQL.
 
-
 ## Architecture
 
 ![Architecture](./_assets/azure-sql-sk-bot.png)
@@ -23,19 +22,141 @@ The solution is composed of three main Azure components:
 - `AzureSqlSk.AppHost` - .NET Aspire host project that orchestrates the API and frontend
 - `AzureSqlSk.Console` - Console application for database deployment and chat interaction
 
-### Azure Open AI
+## Try it out
 
-Make sure to have two models deployed, one for generating embeddings (*text-embedding-ada-002* model recommended) and one for handling the chat (*gpt-4o* recommended). You can use the Azure OpenAI service to deploy the models. Make sure to have the endpoint and the API key ready. The two models are assumed to be deployed with the following names:
+The fastest way to try out the sample application is to follow the instructions below for creating a GitHub Codespace and deploying the required Azure resources by running the [Azure Developer CLI](https://learn.microsoft.com/azure/developer/azure-developer-cli/overview?tabs=windows) template and Bicep scripts included in the repo.
 
-- Embedding model: `text-embedding-ada-002`
-- Chat model: `gpt-4o`
+You can also choose to deploy resources manually, or use existing resources, in your Azure subscription.
 
-## Prerequisites
+## Set up your development environment
+
+### Create a Codespace
+
+A GitHub Codespace is a development environment that is hosted in the cloud that you access via a browser. All of the pre-requisite developer tools are pre-installed and available in the codespace.
 
 - .NET 8.0 SDK
-- Node.js 18.x or later
-- Azure OpenAI API key
-- Azure SQL Database connection string
+- Node.js 18.x
+- Required VS Code extensions
+- Development tools and utilities
+
+You must have a GitHub account to use GitHub Codespaces. If you do not have a GitHub account, you can [Sign Up Here](https://github.com/signup)!
+
+GitHub Codespaces is available for developers in every organization. All personal GitHub.com accounts include a monthly quota of free usage each month. GitHub will provide users in the Free plan 120 core hours, or 60 hours of run time on a 2 core codespace, plus 15 GB of storage each month.
+
+You can see your balance of available codespace hours on the [GitHub billing page](https://github.com/settings/billing/summary).
+
+To use GitHub Codespaces:
+
+1. Within this GitHub repo, select the green "Code" button. Then select "Codespaces". Finally, select the "Create codespace on [the current branch]" button.
+2. The DevContainer will automatically build and configure the environment.
+3. Follow the instructions below to configure the console application and the API application.
+4. In VS Code, open the integrated terminal and sign in to Azure using the command:
+
+   ```bash
+   az login
+   ```
+
+5. Run the following command to trust the development certificate:
+
+   ```bash
+   dotnet dev-certs https --trust
+   ```
+
+### Use Your Local Machine
+
+If you do not have access to GitHub Codespaces, or prefer to use your local machine, follow the instructions below to configure a development environment on your local machine using Visual Studio Code and Python.
+
+Install the following:
+
+1. [Visual Studio Code](https://code.visualstudio.com/download) with the following extensions:
+
+   - [Azure Account](https://marketplace.visualstudio.com/items/?itemName=ms-vscode.azure-account)
+   - [Azure Resources](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-azureresourcegroups)
+   - [Bicep](https://marketplace.visualstudio.com/items/?itemName=ms-azuretools.vscode-bicep)
+   - [Docker](https://marketplace.visualstudio.com/items/?itemName=ms-azuretools.vscode-docker)
+   - [C#](https://marketplace.visualstudio.com/items/?itemName=ms-dotnettools.csharp)
+   - [C# Dev Kit](https://marketplace.visualstudio.com/items/?itemName=ms-dotnettools.csdevkit)
+   - [.NET Install Tool](https://marketplace.visualstudio.com/items/?itemName=ms-dotnettools.vscode-dotnet-runtime)
+   - [Vetur (for Vue JS)](https://marketplace.visualstudio.com/items/?itemName=octref.vetur)
+   - [MSSQL](https://marketplace.visualstudio.com/items/?itemName=ms-mssql.mssql)
+
+2. [.NET 8.0 SDK](https://dotnet.microsoft.com/download/dotnet)
+3. [Node.js 18.x](https://nodejs.org/en/) or later
+
+After installing the above tools, clone the [Azure SQL Chat with your data repo](https://aka.ms/azuresqldb-chat-sk) and open it in VS Code.
+
+## Provision Azure Resources
+
+The solution requires an Azure SQL database and Azure OpenAI services. You can use the provided Azure Developer CLI template to deploy new resources into your Azure subscription, manually deploy the resources, or use existing services.
+
+### Using Azure Developer CLI Template
+
+The template provided in this repo will deploy a small Azure SQL database and an Azure OpenAI service with the required `gpt-4o` and `text-embedding-ada-002` models.
+
+Azure Developer CLI templates are run using the `azd up` command from an integrated terminal window in VS Code. Follow the steps below to execute the template and provision the necessary Azure resources:
+
+1. Open a new terminal windows in VS Code.
+
+2. Sign into Azure using the Azure CLI:
+
+    ```bash
+    az login
+    ```
+
+3. Sign into the Azure Developer CLI:
+
+    ```bash
+    azd auth login
+    ```
+
+4. Run the deployment command to execute the included Bicep scripts:
+
+    ```bash
+    azd up
+    ```
+
+5. The `azd up` command will prompt you for several values after issuing the command. At the terminal prompt, provide the requested information to provision and deploy the Azure resources:
+
+    - Enter an environment name, such as "dev" or "test."
+    - Select the subscription you want to use for the resources for this solution.
+    - Indicate if you want to deploy an Azure Function App.
+    - Select the Azure region into which you would like to deploy the resources for this solution.
+
+      > **NOTE**: The Bicep script will deploy an Azure OpenAI service and create deployments for the `gpt-4o` and `text-embedding-ada-002` models. To ensure the deployment succeeds, review the [regional availability for Azure OpenAI models](https://learn.microsoft.com/azure/ai-services/openai/concepts/models?tabs=standard%2Cstandard-chat-completions#models-by-deployment-type) before selecting a region. You should also verify you have 10,000 TPMs of available capacity in the region for each model.
+
+    - Enter a resource group name, such as `rg-azure-sql-db-chat-sk`.
+    - Enter a strong password for the Azure SQL Admin account. Note, this is needed to deploy the database, but the Bicep script will configure the SQL Server and database to use Microsoft Entra ID authentication only.
+
+6. Skip to [Configuration](#configuration) below.
+
+### Manually Provision Resources
+
+You can also deploy the required Azure resources manually by using the Azure CLI or Azure portal to create an Azure SQL database and Azure OpenAI service.
+
+For the database, ensure you add the IP address of your local machine to the SQL Server's firewall.
+
+To run the solution, you must deploy two models to your Azure Open AI service:
+
+1. A text embedding model for generating embeddings (*text-embedding-ada-002* model recommended)
+2. A chat model for handling the chat (*gpt-4o* recommended)
+
+You can use the Azure AI Foundry portal to deploy the required models into your Azure OpenAI service. The two models are assumed to be deployed with the following names:
+
+- Chat model: `gpt-4o`
+- Embedding model: `text-embedding-ada-002`
+
+Once your resources are deployed, you can skip to [Deploy Sample Database](#deploy-sample-database) below.
+
+### Use Existing Azure Resources
+
+It is also possible to leverage an existing Azure SQL database and Azure OpenAI service in your subscription to run the solution. Using that approach, you must deploy the sample database onto your Azure SQL server and ensure the correct models are deployed into your Azure OpenAI service.
+
+To deploy the database, you must create a new database or use an existing database and deploy the sample database into that.
+
+Ensure your Azure Open AI service has two models deployed, one for generating embeddings (*text-embedding-ada-002* model recommended) and one for handling the chat (*gpt-4o* recommended). You can use the Azure AI Foundry portal to deploy the models into your Azure OpenAI service. The two models are assumed to be deployed with the following names:
+
+- Chat model: `gpt-4o`
+- Embedding model: `text-embedding-ada-002`
 
 ## Configuration
 
@@ -149,7 +270,6 @@ Make sure you have created the `appsettings.Development.json` file in the `Azure
 >
 > `dotnet dev-certs https --trust`
 
-
 This will start both the API and frontend applications and launch the .NET Aspire dashboard.
 
 The console output will show a URL for the Aspire dashboard, containing a unique login token. You can use this token to access the dashboard. The output will look something like this:
@@ -240,41 +360,6 @@ If you prefer to use the console application for testing, you can run the chat a
    ```bash
    npm run dev
    ```
-
-## Development in GitHub Codespaces
-
-A GitHub Codespace is a development environment that is hosted in the cloud that you access via a browser. All of the pre-requisite developer tools are pre-installed and available in the codespace.
-
-- .NET 8.0 SDK
-- Node.js 18.x
-- Required VS Code extensions
-- Development tools and utilities
-
-You must have a GitHub account to use GitHub Codespaces. If you do not have a GitHub account, you can [Sign Up Here](https://github.com/signup)!
-
-GitHub Codespaces is available for developers in every organization. All personal GitHub.com accounts include a monthly quota of free usage each month. GitHub will provide users in the Free plan 120 core hours, or 60 hours of run time on a 2 core codespace, plus 15 GB of storage each month.
-
-You can see your balance of available codespace hours on the [GitHub billing page](https://github.com/settings/billing/summary).
-
-To use GitHub Codespaces:
-
-1. Within this GitHub repo, select the green "Code" button. Then select "Codespaces". Finally, select the "Create codespace on [the current branch]" button.
-2. The DevContainer will automatically build and configure the environment.
-3. Follow the instructions above to configure the console application and the API application.
-4. In VS Code, open the integrated terminal and sign in to Azure using the command:
-
-   ```bash
-   az login
-   ```
-
-5. Run the following command to trust the development certificate:
-
-   ```bash
-   dotnet dev-certs https --trust
-   ```
-
-6. Deploy the database objects and sample data using the console application. This will create the necessary tables and insert some sample data into the database.
-7. Run the application using the Aspire host project as described above.
 
 ## F.A.Q.
 
