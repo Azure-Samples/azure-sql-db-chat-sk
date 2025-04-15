@@ -371,6 +371,10 @@ https://github.com/Azure-Samples/azure-sql-db-vectorizer
 
 It does exactly what you are looking for.
 
+## Code walkthrough
+
+Refer to the [code walkthrough document](walkthrough.md) for a detailed explanation of the code structure and how the different components work together.
+
 ## Contributing
 
 Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
