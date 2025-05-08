@@ -2,14 +2,15 @@ CREATE OR ALTER PROCEDURE dbo.find_communication_history_by_subject
 @customerId INT, 
 @subject NVARCHAR(MAX) = 'all'
 AS
-IF ((@subject IS NULL) OR (TRIM(@subjec)='') OR (TRIM(LOWER(@subject))='all'))
+IF ((@subject IS NULL) OR (TRIM(@subject)='') OR (TRIM(LOWER(@subject))='all'))
 BEGIN
 
     SELECT TOP(10)
         id,
         [communication_type],
         [communication_date] as [date],
-        details
+        details,
+        cast(0.0 as float) as distance
     FROM 
         [dbo].[communication_history] e 
     WHERE
@@ -20,7 +21,7 @@ BEGIN
 END ELSE BEGIN 
 
     DECLARE @e vector(1536)
-    EXEC [dbo].[get_embedding] @subject, @e OUTPUT;
+    EXEC [dbo].[get_embedding] @subject, @e OUTPUT WITH RESULT SETS NONE;
 
     SELECT TOP(10)
         id,
