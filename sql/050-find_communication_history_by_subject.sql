@@ -34,7 +34,7 @@ END ELSE BEGIN
     WHERE
         e.customer_id = @customerId
     AND 
-        VECTOR_DISTANCE('cosine', @e, [embedding]) < 0.6
+        VECTOR_DISTANCE('cosine', @e, [embedding]) < 0.75
     ORDER BY    
         distance
 
