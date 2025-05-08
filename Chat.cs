@@ -43,7 +43,7 @@ public class ChatBot
 
         var table = new Table();    
         table.Expand();      
-        table.AddColumn(new TableColumn("[bold]Insurance Agent Assistant[/] v2.100").Centered());       
+        table.AddColumn(new TableColumn("[bold]Insurance Agent Assistant[/] v2.200").Centered());       
         AnsiConsole.Write(table);
 
         //AnsiConsole.WriteLine($"azureOpenAIEndpoint: {azureOpenAIEndpoint}, embeddingModelDeploymentName: {embeddingModelDeploymentName}, chatModelDeploymentName: {chatModelDeploymentName}, sqlTableName: {sqlTableName}");
@@ -86,6 +86,22 @@ public class ChatBot
             AnsiConsole.WriteLine("Initializing plugins...");
             var kernel = services.GetRequiredService<Kernel>();
             kernel.Plugins.AddFromObject(new SearchSessionPlugin(kernel, memory, logger, sqlConnectionString));
+            // await using var mcpClient = await McpClientFactory.CreateAsync(
+            //     new SseClientTransport(new () {
+            //         Name = "MyFirstMCP",
+            //         Endpoint = "http://localhost:5248"
+            //     })
+            // );
+            // var tools = await mcpClient.ListToolsAsync();
+            // kernel.Plugins.AddFromFunctions("MyFirstMCP", tools.Select(x => x.AsKernelFunction()));
+            
+            foreach(var p in kernel.Plugins)
+            {
+                foreach(var f in p.GetFunctionsMetadata())
+                {
+                    AnsiConsole.WriteLine($"Plugin: {p.Name}, Function: {f.Name}");
+                }
+            }
             var ai = kernel.GetRequiredService<IChatCompletionService>();
             
             AnsiConsole.WriteLine("Initializing long-term memory...");
