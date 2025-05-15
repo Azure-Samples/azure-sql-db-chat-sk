@@ -24,7 +24,7 @@ class DatabaseUtils
         }
         
         var csb = new SqlConnectionStringBuilder(sqlConnectionString);
-        Console.WriteLine($"Deploying database: {csb.InitialCatalog}");
+        Console.WriteLine($"Deploying database: {csb.InitialCatalog}@{csb.DataSource} ");
 
         Console.WriteLine("Testing connection...");
         var conn = new SqlConnection(csb.ToString());

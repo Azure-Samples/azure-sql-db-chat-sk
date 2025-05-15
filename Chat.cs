@@ -99,7 +99,7 @@ public class ChatBot
             {
                 foreach(var f in p.GetFunctionsMetadata())
                 {
-                    AnsiConsole.WriteLine($"Plugin: {p.Name}, Function: {f.Name}");
+                    AnsiConsole.WriteLine($"\tPlugin: {p.Name}, Function: {f.Name}");
                 }
             }
             var ai = kernel.GetRequiredService<IChatCompletionService>();
@@ -178,14 +178,15 @@ public class ChatBot
             var firstLine = true;
             await foreach (var message in ai.GetStreamingChatMessageContentsAsync(chat, openAIPromptExecutionSettings, kernel))
             {
-                if (firstLine && message.Content != null && message.Content.Length > 0)
-                {
-                    AnsiConsole.Cursor.MoveUp();
-                    AnsiConsole.WriteLine("                                  ");
-                    AnsiConsole.Cursor.MoveUp();
-                    AnsiConsole.Write($"🤖: ");
-                    firstLine = false;
-                }
+                if (!enableDebug)
+                    if (firstLine && message.Content != null && message.Content.Length > 0)
+                    {
+                        AnsiConsole.Cursor.MoveUp();
+                        AnsiConsole.WriteLine("                                  ");
+                        AnsiConsole.Cursor.MoveUp();
+                        AnsiConsole.Write($"🤖: ");
+                        firstLine = false;
+                    }
                 AnsiConsole.Write(message.Content ?? string.Empty);
                 builder.Append(message.Content);
             }
