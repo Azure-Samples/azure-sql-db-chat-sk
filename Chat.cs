@@ -11,6 +11,9 @@ using DotNetEnv;
 using System.Text.Json;
 using Spectre.Console;
 using Microsoft.SemanticKernel.Services;
+using Azure.Identity;
+using Microsoft.SemanticKernel.Embeddings;
+using Microsoft.Extensions.AI;
 
 #pragma warning disable SKEXP0001, SKEXP0010, SKEXP0020
 
@@ -29,7 +32,7 @@ public class ChatBot
     {
         Env.Load(envFile);
         azureOpenAIEndpoint = Env.GetString("OPENAI_URL");
-        azureOpenAIApiKey = Env.GetString("OPENAI_KEY");
+        azureOpenAIApiKey = Env.GetString("OPENAI_KEY") ?? string.Empty;
         embeddingModelDeploymentName = Env.GetString("OPENAI_EMBEDDING_DEPLOYMENT_NAME");
         chatModelDeploymentName = Env.GetString("OPENAI_CHAT_DEPLOYMENT_NAME");
         sqlConnectionString = Env.GetString("MSSQL_CONNECTION_STRING");
@@ -41,13 +44,13 @@ public class ChatBot
         AnsiConsole.Clear();
         AnsiConsole.Foreground = Color.Green;
 
-        var table = new Table();    
-        table.Expand();      
-        table.AddColumn(new TableColumn("[bold]Insurance Agent Assistant[/] v2.200").Centered());       
+        var table = new Table();
+        table.Expand();
+        table.AddColumn(new TableColumn("[bold]Insurance Agent Assistant[/] v2.210").Centered());
         AnsiConsole.Write(table);
 
         //AnsiConsole.WriteLine($"azureOpenAIEndpoint: {azureOpenAIEndpoint}, embeddingModelDeploymentName: {embeddingModelDeploymentName}, chatModelDeploymentName: {chatModelDeploymentName}, sqlTableName: {sqlTableName}");
-        
+
         var openAIPromptExecutionSettings = new AzureOpenAIPromptExecutionSettings()
         {
             FunctionChoiceBehavior = FunctionChoiceBehavior.Auto()
@@ -56,33 +59,34 @@ public class ChatBot
         (var logger, var kernel, var memory, var ai) = await AnsiConsole.Status().StartAsync("Booting up agent...", async ctx =>
         {
             ctx.Spinner(Spinner.Known.Default);
-            ctx.SpinnerStyle(Style.Parse("yellow"));          
+            ctx.SpinnerStyle(Style.Parse("yellow"));
 
             AnsiConsole.WriteLine("Initializing kernel...");
+            var credentials = new DefaultAzureCredential();
             var sc = new ServiceCollection();
-            sc.AddAzureOpenAIChatCompletion(chatModelDeploymentName, azureOpenAIEndpoint, azureOpenAIApiKey);
+
+            if (string.IsNullOrEmpty(azureOpenAIApiKey))
+            {
+                sc.AddAzureOpenAIChatCompletion(chatModelDeploymentName, azureOpenAIEndpoint, credentials);
+                sc.AddAzureOpenAITextEmbeddingGeneration(embeddingModelDeploymentName, azureOpenAIEndpoint, credentials);
+            }
+            else
+            {
+                sc.AddAzureOpenAIChatCompletion(chatModelDeploymentName, azureOpenAIEndpoint, azureOpenAIApiKey);
+                sc.AddAzureOpenAITextEmbeddingGeneration(embeddingModelDeploymentName, azureOpenAIEndpoint, azureOpenAIApiKey);                
+            }
+
             sc.AddKernel();
             sc.AddLogging(b => b.AddSimpleConsole(o => { o.ColorBehavior = LoggerColorBehavior.Enabled; }).SetMinimumLevel(enableDebug ? LogLevel.Debug : LogLevel.None));
+
             var services = sc.BuildServiceProvider();
             var logger = services.GetRequiredService<ILogger<Program>>();
+
             var memory = new MemoryBuilder()
                     .WithSqlServerMemoryStore(sqlConnectionString)
-                    .WithTextEmbeddingGeneration(
-                        (loggerFactory, httpClient) =>
-                        {
-                            return new AzureOpenAITextEmbeddingGenerationService(
-                                    embeddingModelDeploymentName,
-                                    azureOpenAIEndpoint,
-                                    azureOpenAIApiKey,
-                                    modelId: null,
-                                    httpClient: httpClient,
-                                    loggerFactory: loggerFactory,
-                                    dimensions: 1536
-                            );
-                        }
-                    )
-                    .Build();  
-                    
+                    .WithTextEmbeddingGeneration((_, _) => services.GetRequiredService<ITextEmbeddingGenerationService>())
+                    .Build();
+
             AnsiConsole.WriteLine("Initializing plugins...");
             var kernel = services.GetRequiredService<Kernel>();
             kernel.Plugins.AddFromObject(new SearchSessionPlugin(kernel, memory, logger, sqlConnectionString));
@@ -94,33 +98,35 @@ public class ChatBot
             // );
             // var tools = await mcpClient.ListToolsAsync();
             // kernel.Plugins.AddFromFunctions("MyFirstMCP", tools.Select(x => x.AsKernelFunction()));
-            
-            foreach(var p in kernel.Plugins)
+
+            foreach (var p in kernel.Plugins)
             {
-                foreach(var f in p.GetFunctionsMetadata())
+                foreach (var f in p.GetFunctionsMetadata())
                 {
-                    AnsiConsole.WriteLine($"\tPlugin: {p.Name}, Function: {f.Name}");
+                    AnsiConsole.WriteLine($"Plugin: {p.Name}, Function: {f.Name}");
                 }
             }
             var ai = kernel.GetRequiredService<IChatCompletionService>();
-            
+
             AnsiConsole.WriteLine("Initializing long-term memory...");
-            await memory.SaveInformationAsync(sqlTableName, "Premium for car insurance have been increased by 15% starting from Septmber 2024", "policy-price-increase");        
-            await memory.SaveInformationAsync(sqlTableName, """
-                Customers can reduce there premium by subscribing to the "Safety Score" program which will 
-                monitor their driving habits and provide discounts based on their driving score.
-            """, "memory-1");                
-            
+            await memory.SaveInformationAsync(sqlTableName, "Premium for car insurance have been increased by 15% starting from Septmber 2024", "policy-price-increase");
+            await memory.SaveInformationAsync(sqlTableName, "Customers can reduce their premium by subscribing to the 'Safety Score' program which will monitor their driving habits and provide discounts based on their driving score.", "memory-1");
+
             AnsiConsole.WriteLine("Done!");
 
             return (logger, kernel, memory, ai);
         });
 
         AnsiConsole.WriteLine("Ready to chat! Hit 'ctrl-c' to quit.");
-        var chat = new ChatHistory($"You are an AI assistant that helps insurance agents to find information on customers data and status. Use a professional tone when aswering and provide a summary of data instead of lists. If users ask about topics you don't know, answer that you don't know. Today's date is {DateTime.Now:yyyy-MM-dd}. Query the database at every user request, even if information is available in chat history, to make sure you always have the latest information.");    
+        var chat = new ChatHistory($"""
+            You are an AI assistant that helps insurance agents to find information on customers data and status. 
+            Use a professional tone when aswering and provide a summary of data instead of lists. 
+            If users ask about topics you don't know, answer that you don't know. Today's date is {DateTime.Now:yyyy-MM-dd}. 
+            Query the database at every user request, even if information is available in chat history, to make sure you always have the latest information.
+        """);
         var builder = new StringBuilder();
         while (true)
-        {            
+        {
             AnsiConsole.WriteLine();
             var question = AnsiConsole.Prompt(new TextPrompt<string>($"🧑: "));
 
@@ -136,7 +142,7 @@ public class ChatBot
                     chat.RemoveRange(1, chat.Count - 1);
                     AnsiConsole.WriteLine("Chat history cleared.");
                     continue;
-            
+
                 case "/h":
                     foreach (var message in chat)
                     {
@@ -144,7 +150,7 @@ public class ChatBot
                         AnsiConsole.WriteLine($"> MESSAGE  > {message.Content}");
                         AnsiConsole.WriteLine($"> METADATA > {JsonSerializer.Serialize(message.Metadata)}");
                         AnsiConsole.WriteLine($"> ------------------------------------");
-                    }                        
+                    }
                     continue;
             }
 
@@ -153,9 +159,9 @@ public class ChatBot
             await AnsiConsole.Status().StartAsync("Thinking...", async ctx =>
             {
                 ctx.Spinner(Spinner.Known.Default);
-                ctx.SpinnerStyle(Style.Parse("yellow"));       
+                ctx.SpinnerStyle(Style.Parse("yellow"));
 
-                logger.LogDebug("Searching information from the memory...");                
+                logger.LogDebug("Searching information from the memory...");
                 builder.Clear();
                 await foreach (var result in memory.SearchAsync(sqlTableName, question, limit: 3, minRelevanceScore: 0.35))
                 {
@@ -170,7 +176,7 @@ public class ChatBot
                     chat.AddSystemMessage(builder.ToString());
                 }
             });
-            
+
             AnsiConsole.WriteLine();
             AnsiConsole.WriteLine("🤖: Formulating answer...");
             builder.Clear();
@@ -190,10 +196,10 @@ public class ChatBot
                 AnsiConsole.Write(message.Content ?? string.Empty);
                 builder.Append(message.Content);
             }
-            AnsiConsole.WriteLine();                        
-            
+            AnsiConsole.WriteLine();
 
-            chat.AddAssistantMessage(builder.ToString());           
+
+            chat.AddAssistantMessage(builder.ToString());
         }
     }
 }

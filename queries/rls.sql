@@ -5,12 +5,18 @@ create table dbo.access_security
     [customer_id] int not null
 )
 go
+delete from dbo.access_security;
 insert into dbo.access_security 
     (user_account, customer_id) 
 values 
     (suser_sname(), 920411),
     (suser_sname(), 290332)
 go
+
+--delete from dbo.access_security  where customer_id = 920411
+
+select suser_sname()
+select * from dbo.access_security 
 
 create function dbo.check_access_security(@customer_id as int)
 returns table
