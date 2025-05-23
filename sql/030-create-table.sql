@@ -1,3 +1,8 @@
+/*
+DROP TABLE [web].[sessions_details_embeddings]
+DROP TABLE [web].[sessions]
+*/
+
 CREATE SEQUENCE [web].[global_id] 
     AS [int]
     START WITH 1
@@ -11,14 +16,10 @@ CREATE TABLE [web].[sessions]
     [abstract] NVARCHAR (MAX) NOT NULL,
     [external_id] VARCHAR (100) COLLATE Latin1_General_100_BIN2 NOT NULL,
     [details] JSON NULL,
-    [require_embeddings_update] BIT DEFAULT ((0)) NOT NULL,
 
     PRIMARY KEY CLUSTERED ([id] ASC),
     UNIQUE NONCLUSTERED ([title] ASC)
 );
-GO
-
-ALTER TABLE [web].[sessions] ENABLE CHANGE_TRACKING WITH (TRACK_COLUMNS_UPDATED = OFF);
 GO
 
 CREATE TABLE [web].[sessions_details_embeddings]
