@@ -6,7 +6,7 @@ GO
 
 INSERT INTO [dbo].[customers] ([id], [first_name], [last_name], [address], [city], [state], [zip], [country], [email], [details])
 VALUES 
-(1539726, 'John', 'Doe', '123 Old Road', 'Bellevue', 'WA', '98007', 'USA', 'johndoe@contoso.com', '{"active-policies": ["car", "renters"]}'),
+(1539726, 'Bob', 'Loblaw', '123 Old Road', 'Bellevue', 'WA', '98007', 'USA', 'bobloblaw@contoso.com', '{"active-policies": ["car", "renters"]}'),
 (920411, 'John', 'Doe', '456 Main St', 'Redmond', 'WA', '98052', 'USA', 'jd@adventureworks.com', '{"active-policies": ["umbrella", "car", "homeowners"]}'),
 (290332, 'John', 'Doe', '789 Lake Road', 'Kirkland', 'WA', '98017', 'USA', 'johnd2@contoso.com', '{"active-policies": ["car", "boat"]}'),
 (430112, 'Jane', 'Smith', '101 River St', 'Seattle', 'WA', '98101', 'USA', 'jsmith@adventureworks.com', '{"active-policies": ["car", "homeowners"]}'),
