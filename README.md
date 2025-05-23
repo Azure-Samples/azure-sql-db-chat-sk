@@ -1,7 +1,11 @@
-# Azure SQL Chat with your data BOT
+# Azure SQL Chat with your data 
 
 This is a simple example of a chatbot that uses Azure SQL to store and retrieve data using both RAG and Natural-Language-to-SQL (NL2QL) to allow chat on both structured and non-structured data. The bot is built using the Microsoft Semantic Kernel Framework and the newly added support for vectors in Azure SQL.
 
+📺 This repo has been discussed on #DataExposed too: [Building the ultimate chatbot on your own data with Azure SQL and Semantic Kernel](https://www.youtube.com/watch?v=HAu2APLuj_8&list=PLlrxD0HtieHieV7Jls72yFPSKyGqycbZR)
+
+> [!NOTE]
+> If you are looking for the sample using *insurance* data, please use the [`insurance-chatbot-demo` branch](https://github.com/Azure-Samples/azure-sql-db-chat-sk/tree/insurance-chatbot-demo). 
 
 ## Architecture
 
@@ -17,7 +21,7 @@ The solution is composed of three main Azure components:
 
 ### Azure Open AI
 
-Make sure to have two models deployed, one for generating embeddings (*text-embedding-3-small* model recommended) and one for handling the chat (*gpt-4 turbo* recommended). You can use the Azure OpenAI service to deploy the models. Make sure to have the endpoint and the API key ready. The two models are assumed to be deployed with the following names:
+Make sure to have two models deployed, one for generating embeddings (*text-embedding-3-small* model recommended) and one for handling the chat completion (*gpt-4 turbo* recommended). You can use the Azure OpenAI service to deploy the models. Make sure to have the endpoint and the API key ready. The two models are assumed to be deployed with the following names:
 
 - Embedding model: `text-embedding-3-small`
 - Chat model: `gpt-4`
@@ -36,7 +40,7 @@ Create a `.env` file starting from the `.env.sample` file:
 ### Database
 
 > [!NOTE]  
-> Vector Functions are in Early Adopter Preview. Get access to the preview via https://aka.ms/azuresql-vector-eap-announcement
+> Vector Functions are in Public Preview. Learn the details about vectors in Azure SQL here: https://aka.ms/azure-sql-vector-public-preview
 
 To deploy the database, you can just use the `deploy` option of the chatbot application. Make sure you have created the `.env` file as explained in the previoud section, and then run the following command:
 
