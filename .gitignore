@@ -401,3 +401,4 @@ FodyWeavers.xsd
 .env
 prompts.txt
 *.local.sql
+*.env
