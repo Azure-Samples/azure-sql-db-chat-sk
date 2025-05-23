@@ -254,6 +254,15 @@ This solution uses [.NET Aspire](https://learn.microsoft.com/dotnet/aspire/get-s
 
 Make sure you have created the `appsettings.Development.json` file in the `AzureSqlSk.Api` directory as explained above.
 
+Install the required Node libraries:
+
+```bash
+cd AzureSqlSk.Web
+npm install
+```
+
+Then return to the root of the solution:
+
 1. Sign in to Azure using the Azure CLI:
 
    ```bash
