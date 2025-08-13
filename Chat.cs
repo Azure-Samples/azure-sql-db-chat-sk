@@ -46,7 +46,7 @@ public class ChatBot
 
         var table = new Table();
         table.Expand();
-        table.AddColumn(new TableColumn("[bold]Insurance Agent Assistant[/] v2.210").Centered());
+        table.AddColumn(new TableColumn("[bold]Insurance Agent Assistant[/] v2.220").Centered());
         AnsiConsole.Write(table);
 
         //AnsiConsole.WriteLine($"azureOpenAIEndpoint: {azureOpenAIEndpoint}, embeddingModelDeploymentName: {embeddingModelDeploymentName}, chatModelDeploymentName: {chatModelDeploymentName}, sqlTableName: {sqlTableName}");
@@ -89,7 +89,7 @@ public class ChatBot
 
             AnsiConsole.WriteLine("Initializing plugins...");
             var kernel = services.GetRequiredService<Kernel>();
-            kernel.Plugins.AddFromObject(new SearchSessionPlugin(kernel, memory, logger, sqlConnectionString));
+            kernel.Plugins.AddFromObject(new SearchDatabasePlugin(kernel, memory, logger, sqlConnectionString));
             // await using var mcpClient = await McpClientFactory.CreateAsync(
             //     new SseClientTransport(new () {
             //         Name = "MyFirstMCP",

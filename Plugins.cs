@@ -16,12 +16,11 @@ namespace azure_sql_sk;
 public class CommunicationHistory {
     public required string Id { get; set; }
     public required string CommunicationType { get; set; }
-
     public required string Date { get; set; }
     public required string Details { get; set; }
 }
 
-public class SearchSessionPlugin(Kernel kernel, ISemanticTextMemory memory, ILogger logger, string connectionString)
+public class SearchDatabasePlugin(Kernel kernel, ISemanticTextMemory memory, ILogger logger, string connectionString)
 {   
     private readonly ILogger logger = logger;
     private readonly Kernel kernel = kernel;    
