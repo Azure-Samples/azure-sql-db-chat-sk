@@ -9,8 +9,6 @@ using Microsoft.SemanticKernel.Connectors.OpenAI;
 using Microsoft.SemanticKernel.Memory;
 using DotNetEnv;
 
-#pragma warning disable SKEXP0001
-
 namespace azure_sql_sk;
 
 public class CommunicationHistory {
@@ -20,11 +18,10 @@ public class CommunicationHistory {
     public required string Details { get; set; }
 }
 
-public class SearchDatabasePlugin(Kernel kernel, ISemanticTextMemory memory, ILogger logger, string connectionString)
+public class SearchDatabasePlugin(Kernel kernel, ILogger logger, string connectionString)
 {   
     private readonly ILogger logger = logger;
-    private readonly Kernel kernel = kernel;    
-    private readonly ISemanticTextMemory memory = memory;
+    private readonly Kernel kernel = kernel;        
     private readonly string connectionString = connectionString;
 
     [KernelFunction("query_customers_table")]
@@ -103,7 +100,7 @@ public class SearchDatabasePlugin(Kernel kernel, ISemanticTextMemory memory, ILo
         COLUMNS:
         [id]: internal claim id
         [customer_id]: customer id
-        [claim_type]: claim type (auto, home, life, health, etc)
+        [claim_type]: claim type (car, home, life, health, etc)
         [claim_date]: claim date
         [details]: details and notes about the claim added by the agent 
         """)]
@@ -151,11 +148,11 @@ public class SearchDatabasePlugin(Kernel kernel, ISemanticTextMemory memory, ILo
         Query the database to find policies data for customers
         The high-level schema of the database is the following:
         
-        TABLE: [dbo].[claims]
+        TABLE: [dbo].[policies]
         COLUMNS:
-        [id]: internal claim id
+        [id]: internal policy id
         [customer_id]: customer id
-        [type]: policy type (auto, home, life, health, etc)
+        [type]: policy type (car, home, life, health, etc)
         [premium]: premium for the policy duration
         [payment_type]: payment type (monthly, yearly, etc)
         [start_date]: payment start date
@@ -226,30 +223,4 @@ public class SearchDatabasePlugin(Kernel kernel, ISemanticTextMemory memory, ILo
                      
         return notes;    
     }
-
-    // [KernelFunction("store_memory_for_customer")]
-    // [Description("Store a new memory in the agent memory for a specific customer")]
-    // public async void StoreMemory(int customerId, string memoryContent)
-    // {
-    //     logger.LogInformation($"Storing memory for Customer '{customerId}', Memory: '{memoryContent}'");
-
-    //     var sqlTableName = Env.GetString("MSSQL_TABLE_NAME") ?? "ChatMemories";
-    //     await memory.SaveInformationAsync(sqlTableName, $"Customer Id:{customerId} - ", memoryContent, Guid.NewGuid().ToString(), additionalMetadata: $"CustomerId:{customerId}");        
-    // }
-
-    // [KernelFunction("retrieve_memory_for_customer")]
-    // [Description("Search for memories about a specific customer")]
-    // public async Task<IEnumerable<string>> SearchMemory(int customerId, string searchText)
-    // {
-    //     logger.LogInformation($"Querying memories for Customer '{customerId}', Search Query: '{searchText}'");
-        
-    //     var sqlTableName = Env.GetString("MSSQL_TABLE_NAME") ?? "ChatMemories";
-    //     var results = new List<string>();
-    //     await foreach (var result in memory.SearchAsync(sqlTableName, searchText, limit: 3, minRelevanceScore: 0.35))
-    //     {
-    //         if (result.Metadata.AdditionalMetadata == $"CustomerID:{customerId}")
-    //             results.Add(result.Metadata.Text);           
-    //     }
-    //     return results;
-    // }
 }

@@ -5,19 +5,30 @@ using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.AzureOpenAI;
 using Microsoft.SemanticKernel.Connectors.SqlServer;
-using Microsoft.SemanticKernel.Memory;
 using Microsoft.Extensions.Logging.Console;
 using DotNetEnv;
 using System.Text.Json;
 using Spectre.Console;
-using Microsoft.SemanticKernel.Services;
 using Azure.Identity;
-using Microsoft.SemanticKernel.Embeddings;
 using Microsoft.Extensions.AI;
+using Microsoft.Extensions.VectorData;
+using System.Diagnostics;
 
 #pragma warning disable SKEXP0001, SKEXP0010, SKEXP0020
 
 namespace azure_sql_sk;
+
+public class Memory
+{
+    [VectorStoreKey]
+    public int Id { get; set; }
+
+    [VectorStoreData]
+    public string? Content { get; set; }
+
+    [VectorStoreVector(Dimensions: 1536, DistanceFunction = DistanceFunction.CosineDistance)]
+    public ReadOnlyMemory<float>? Embedding { get; set; }
+}
 
 public class ChatBot
 {
@@ -46,7 +57,7 @@ public class ChatBot
 
         var table = new Table();
         table.Expand();
-        table.AddColumn(new TableColumn("[bold]Insurance Agent Assistant[/] v2.220").Centered());
+        table.AddColumn(new TableColumn("[bold]Insurance Agent Assistant[/] v2.3").Centered());
         AnsiConsole.Write(table);
 
         //AnsiConsole.WriteLine($"azureOpenAIEndpoint: {azureOpenAIEndpoint}, embeddingModelDeploymentName: {embeddingModelDeploymentName}, chatModelDeploymentName: {chatModelDeploymentName}, sqlTableName: {sqlTableName}");
@@ -56,7 +67,7 @@ public class ChatBot
             FunctionChoiceBehavior = FunctionChoiceBehavior.Auto()
         };
 
-        (var logger, var kernel, var memory, var ai) = await AnsiConsole.Status().StartAsync("Booting up agent...", async ctx =>
+        (var logger, var kernel, var ai, var knowledge) = await AnsiConsole.Status().StartAsync("Booting up agent...", async ctx =>
         {
             ctx.Spinner(Spinner.Known.Default);
             ctx.SpinnerStyle(Style.Parse("yellow"));
@@ -68,12 +79,12 @@ public class ChatBot
             if (string.IsNullOrEmpty(azureOpenAIApiKey))
             {
                 sc.AddAzureOpenAIChatCompletion(chatModelDeploymentName, azureOpenAIEndpoint, credentials);
-                sc.AddAzureOpenAITextEmbeddingGeneration(embeddingModelDeploymentName, azureOpenAIEndpoint, credentials);
+                sc.AddAzureOpenAIEmbeddingGenerator(embeddingModelDeploymentName, azureOpenAIEndpoint, credentials);
             }
             else
             {
                 sc.AddAzureOpenAIChatCompletion(chatModelDeploymentName, azureOpenAIEndpoint, azureOpenAIApiKey);
-                sc.AddAzureOpenAITextEmbeddingGeneration(embeddingModelDeploymentName, azureOpenAIEndpoint, azureOpenAIApiKey);                
+                sc.AddAzureOpenAIEmbeddingGenerator(embeddingModelDeploymentName, azureOpenAIEndpoint, azureOpenAIApiKey);
             }
 
             sc.AddKernel();
@@ -82,14 +93,17 @@ public class ChatBot
             var services = sc.BuildServiceProvider();
             var logger = services.GetRequiredService<ILogger<Program>>();
 
-            var memory = new MemoryBuilder()
-                    .WithSqlServerMemoryStore(sqlConnectionString)
-                    .WithTextEmbeddingGeneration((_, _) => services.GetRequiredService<ITextEmbeddingGenerationService>())
-                    .Build();
-
             AnsiConsole.WriteLine("Initializing plugins...");
-            var kernel = services.GetRequiredService<Kernel>();
-            kernel.Plugins.AddFromObject(new SearchDatabasePlugin(kernel, memory, logger, sqlConnectionString));
+            var kernel = services.GetRequiredService<Kernel>();            
+            kernel.Plugins.AddFromObject(new SearchDatabasePlugin(kernel, logger, sqlConnectionString));
+            foreach (var p in kernel.Plugins)
+            {
+                foreach (var f in p.GetFunctionsMetadata())
+                {
+                    AnsiConsole.WriteLine($"Plugin: {p.Name}, Function: {f.Name}");
+                }
+            }
+
             // await using var mcpClient = await McpClientFactory.CreateAsync(
             //     new SseClientTransport(new () {
             //         Name = "MyFirstMCP",
@@ -99,25 +113,29 @@ public class ChatBot
             // var tools = await mcpClient.ListToolsAsync();
             // kernel.Plugins.AddFromFunctions("MyFirstMCP", tools.Select(x => x.AsKernelFunction()));
 
-            foreach (var p in kernel.Plugins)
-            {
-                foreach (var f in p.GetFunctionsMetadata())
-                {
-                    AnsiConsole.WriteLine($"Plugin: {p.Name}, Function: {f.Name}");
-                }
-            }
-            var ai = kernel.GetRequiredService<IChatCompletionService>();
+            var ai = kernel.GetRequiredService<IChatCompletionService>();       
+            var eg = services.GetRequiredService<IEmbeddingGenerator<string, Embedding<float>>>();     
 
-            AnsiConsole.WriteLine("Initializing long-term memory...");
-            await memory.SaveInformationAsync(sqlTableName, "Premium for car insurance have been increased by 15% starting from Septmber 2024", "policy-price-increase");
-            await memory.SaveInformationAsync(sqlTableName, "Customers can reduce their premium by subscribing to the 'Safety Score' program which will monitor their driving habits and provide discounts based on their driving score.", "memory-1");
+            AnsiConsole.WriteLine("Initializing vector store...");
+            var vectorStore =  new SqlServerVectorStore(sqlConnectionString, new SqlServerVectorStoreOptions() { EmbeddingGenerator = eg });        
+            var knowledgeCollection = vectorStore.GetCollection<int, Memory>(sqlTableName);                    
+            await knowledgeCollection.EnsureCollectionExistsAsync();                       
+
+            AnsiConsole.WriteLine("Adding sample knowledge...");
+            string[] knowledge = [
+                "Premium for car insurance have been increased by 15% starting from Septmber 2024",
+                "Customers can reduce their premium by subscribing to the 'Safety Score' program which will monitor their driving habits and provide discounts based on their driving score.",
+            ];
+            var records = knowledge.Select(async (input, index) => new Memory { Id = index+1, Content = input, Embedding = await eg.GenerateVectorAsync(input) }).ToList();
+            await knowledgeCollection.UpsertAsync(records.Select(t => t.Result)); 
 
             AnsiConsole.WriteLine("Done!");
 
-            return (logger, kernel, memory, ai);
+            return (logger, kernel, ai, knowledgeCollection);
         });
 
         AnsiConsole.WriteLine("Ready to chat! Hit 'ctrl-c' to quit.");
+                
         var chat = new ChatHistory($"""
             You are an AI assistant that helps insurance agents to find information on customers data and status. 
             Use a professional tone when aswering and provide a summary of data instead of lists. 
@@ -158,14 +176,18 @@ public class ChatBot
 
             await AnsiConsole.Status().StartAsync("Thinking...", async ctx =>
             {
-                ctx.Spinner(Spinner.Known.Default);
-                ctx.SpinnerStyle(Style.Parse("yellow"));
+                if (!enableDebug)
+                {
+                    ctx.Spinner(Spinner.Known.Default);
+                    ctx.SpinnerStyle(Style.Parse("yellow"));
+                }
 
                 logger.LogDebug("Searching information from the memory...");
                 builder.Clear();
-                await foreach (var result in memory.SearchAsync(sqlTableName, question, limit: 3, minRelevanceScore: 0.35))
+                //var questionVector = await embeddingGenerator.(question);
+                await foreach (var result in knowledge.SearchAsync(question, 3))
                 {
-                    builder.AppendLine(result.Metadata.Text);
+                     if (result.Score < 0.7) builder.AppendLine(result.Record.Content);
                 }
                 if (builder.Length > 0)
                 {

@@ -39,7 +39,7 @@ Create a `.env` file starting from the `.env.sample` file:
 ### Database
 
 > [!NOTE]  
-> Vector Functions are in Public Preview. Learn the details about vectors in Azure SQL here: https://aka.ms/azure-sql-vector-public-preview
+> The SQL Server engine support vector natively. Read everything about it here: [Announcing General Availability of Native Vector Type & Functions in Azure SQL](https://devblogs.microsoft.com/azure-sql/announcing-general-availability-of-native-vector-type-functions-in-azure-sql/)
 
 To deploy the database, you can just use the `deploy` option of the chatbot application. Make sure you have created the `.env` file as explained in the previoud section, and then run the following command:
 
