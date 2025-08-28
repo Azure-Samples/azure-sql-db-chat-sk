@@ -49,7 +49,7 @@ public class SearchSessionPlugin(Kernel kernel, ILogger logger, string connectio
         var chat = new ChatHistory(@"You create T-SQL queries based on the given user request and the provided schema. Just return T-SQL query to be executed. Do not return other text or explanation. Don't use markdown or any wrappers.
         The database schema is the following:
 
-        // this table contains the sessions at the SQL Konferenz 2024 conference
+        // this table contains the sessions available across different conferences
         CREATE TABLE [web].[sessions]
         (
             [id] INT DEFAULT (NEXT VALUE FOR [web].[global_id]) NOT NULL,
@@ -91,7 +91,7 @@ public class SearchSessionPlugin(Kernel kernel, ILogger logger, string connectio
     }
 
     [KernelFunction("find_sessions_similar_to_topic")]
-    [Description("Return a list of sessions at SQL Konferenz 2024 at that are similar to a specific topic or by a specific speaker name specified in the provided topic parameter. If no results are found, an empty list is returned. This function only return data from the SQL Konferenz 2024 conference.")]
+    [Description("Return a list of conference sessions that are similar to a specific topic or by a specific speaker name specified in the provided topic parameter. If no results are found, an empty list is returned.")]
     public async Task<IEnumerable<Session>> GetSessionSimilarToTopic(string topic)
     {        
         logger.LogInformation($"Searching for sessions related to '{topic}'");

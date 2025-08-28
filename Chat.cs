@@ -5,19 +5,15 @@ using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.AzureOpenAI;
 using Microsoft.SemanticKernel.Connectors.SqlServer;
-using Microsoft.SemanticKernel.Memory;
 using Microsoft.Extensions.Logging.Console;
 using DotNetEnv;
-using Microsoft.IdentityModel.Protocols;
-using Microsoft.SemanticKernel.Connectors.OpenAI;
 using Microsoft.Extensions.VectorData;
 using System.Text.Json;
-using OpenAI;
 using Azure.AI.OpenAI;
 using Microsoft.Extensions.AI;
-using Microsoft.Extensions.Primitives;
+using System.Linq;
 
-#pragma warning disable SKEXP0001, SKEXP0010, SKEXP0020
+// #pragma warning disable SKEXP0001, SKEXP0010, SKEXP0020
 
 namespace azure_sql_sk;
 
@@ -58,20 +54,17 @@ public class ChatBot
         var sc = new ServiceCollection();
         sc.AddAzureOpenAIChatCompletion(chatModelDeploymentName, azureOpenAIEndpoint, azureOpenAIApiKey);
         sc.AddKernel();
-        sc.AddLogging(b => b.AddSimpleConsole(o => { o.ColorBehavior = LoggerColorBehavior.Enabled; }).SetMinimumLevel(LogLevel.Debug));       
-        var services = sc.BuildServiceProvider();
+        sc.AddLogging(b => b.AddSimpleConsole(o => { o.ColorBehavior = LoggerColorBehavior.Enabled; }).SetMinimumLevel(LogLevel.Debug));
+
+        var services = sc.BuildServiceProvider();        
         var logger = services.GetRequiredService<ILogger<Program>>();
-        var openAIPromptExecutionSettings = new AzureOpenAIPromptExecutionSettings()
-        {
-            FunctionChoiceBehavior = FunctionChoiceBehavior.Auto()
-        };
 
         Console.WriteLine("Initializing plugins...");
         var kernel = services.GetRequiredService<Kernel>();
         kernel.Plugins.AddFromObject(new SearchSessionPlugin(kernel, logger, sqlConnectionString));
         var ai = kernel.GetRequiredService<IChatCompletionService>();
 
-        Console.WriteLine("Initializing long-term memory...");
+        Console.WriteLine("Initializing vector-store...");
         var embeddingGenerator = new AzureOpenAIClient(
             new Uri(azureOpenAIEndpoint),
             new System.ClientModel.ApiKeyCredential(azureOpenAIApiKey))
@@ -79,19 +72,21 @@ public class ChatBot
             .AsIEmbeddingGenerator();
         
         var vectorStore =  new SqlServerVectorStore(sqlConnectionString, new SqlServerVectorStoreOptions() { EmbeddingGenerator = embeddingGenerator });        
-        var memoriesCollection = vectorStore.GetCollection<int, Memory>(sqlTableName);        
-        await memoriesCollection.EnsureCollectionExistsAsync();
+        var knowledgeCollection = vectorStore.GetCollection<int, Memory>(sqlTableName);        
+        await knowledgeCollection.EnsureCollectionExistsAsync();
 
         string[] memories = [
             "With the new connector Microsoft.SemanticKernel.Connectors.SqlServer it is possible to efficiently store and retrieve memories thanks to the newly added vector support",
             "Microsoft.SemanticKernel.Connectors.SqlServer works with the new Vector Type in SQL Server 2025, Azure SQL and Fabric SQL",
-            "Azure SQL support for vectors Generally Available in Azure!"            
+            "Support for vectors is Generally Available in Azure SQL DB and Azure SQL MI." ,
+            "This is a generic information of the fact that Davide really loves Pizza!"           
         ];
 
         var records = memories.Select(async (input, index) => new Memory { Id = index+1, Content = input, Embedding = await embeddingGenerator.GenerateVectorAsync(input) }).ToList();        
-        await memoriesCollection.UpsertAsync(records.Select(t => t.Result));
+        await knowledgeCollection.UpsertAsync(records.Select(t => t.Result));
 
         Console.WriteLine("Ready to chat! Hit 'ctrl-c' to quit.");
+        var openAIPromptExecutionSettings = new AzureOpenAIPromptExecutionSettings() { FunctionChoiceBehavior = FunctionChoiceBehavior.Auto() };
         var chat = new ChatHistory("You are an AI assistant that helps developers find information on Microsoft technologies. If users ask about topics you don't know, answer that you don't know. Be concise when answering.");
         var builder = new StringBuilder();
         while (true)
@@ -126,9 +121,9 @@ public class ChatBot
             logger.LogDebug("Searching information from the memory...");
             builder.Clear();
             var questionVector = await embeddingGenerator.GenerateVectorAsync(question);
-            await foreach (var result in memoriesCollection.SearchAsync(questionVector, 3))
+            await foreach (var result in knowledgeCollection.SearchAsync(questionVector, 3))
             {
-                builder.AppendLine(result.Record.Content);
+                if (result.Score < 0.7) builder.AppendLine(result.Record.Content);
             }
             if (builder.Length > 0)
             {
