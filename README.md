@@ -21,7 +21,7 @@ The solution is composed of three main Azure components:
 
 ### Azure Open AI
 
-Make sure to have two models deployed, one for generating embeddings (*text-embedding-3-small* model recommended) and one for handling the chat completion (*gpt-4 turbo* recommended). You can use the Azure OpenAI service to deploy the models. Make sure to have the endpoint and the API key ready. The two models are assumed to be deployed with the following names:
+Make sure to have two models deployed, one for generating embeddings (*text-embedding-3-small* model recommended) and one for handling the chat completion (*gpt-4o* recommended). You can use the Azure OpenAI service to deploy the models. Make sure to have the endpoint and the API key ready. The two models are assumed to be deployed with the following names:
 
 - Embedding model: `text-embedding-3-small`
 - Chat model: `gpt-4`
@@ -40,7 +40,7 @@ Create a `.env` file starting from the `.env.sample` file:
 ### Database
 
 > [!NOTE]  
-> Vector Functions are in Public Preview. Learn the details about vectors in Azure SQL here: https://aka.ms/azure-sql-vector-public-preview
+> The SQL Server engine support vector natively. Read everything about it here: [Announcing General Availability of Native Vector Type & Functions in Azure SQL](https://devblogs.microsoft.com/azure-sql/announcing-general-availability-of-native-vector-type-functions-in-azure-sql/)
 
 To deploy the database, you can just use the `deploy` option of the chatbot application. Make sure you have created the `.env` file as explained in the previoud section, and then run the following command:
 
