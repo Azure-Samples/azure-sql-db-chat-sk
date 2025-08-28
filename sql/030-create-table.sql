@@ -40,7 +40,7 @@ CREATE TABLE [web].[sessions_abstracts_embeddings]
 (
     [id] INT DEFAULT (NEXT VALUE FOR [web].[global_id]) NOT NULL,
     [session_id] INT NOT NULL,
-    [abstract_vector_text3] vector(1536) not null
+    [abstract_vector_text3] VECTOR(1536) not null
 )
 GO
 CREATE CLUSTERED INDEX [ixc] ON [web].[sessions_abstracts_embeddings]([session_id] ASC)
