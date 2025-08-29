@@ -5,7 +5,6 @@ using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.AzureOpenAI;
 using Microsoft.SemanticKernel.Connectors.SqlServer;
-using Microsoft.Extensions.Logging.Console;
 using DotNetEnv;
 using System.Text.Json;
 using Spectre.Console;
@@ -13,8 +12,9 @@ using Azure.Identity;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.VectorData;
 using System.Diagnostics;
+using Microsoft.Data.SqlClient;
 
-#pragma warning disable SKEXP0001, SKEXP0010, SKEXP0020
+#pragma warning disable SKEXP0010
 
 namespace azure_sql_sk;
 
@@ -60,24 +60,30 @@ public class ChatBot
         table.AddColumn(new TableColumn("[bold]Insurance Agent Assistant[/] v2.3").Centered());
         AnsiConsole.Write(table);
 
-        //AnsiConsole.WriteLine($"azureOpenAIEndpoint: {azureOpenAIEndpoint}, embeddingModelDeploymentName: {embeddingModelDeploymentName}, chatModelDeploymentName: {chatModelDeploymentName}, sqlTableName: {sqlTableName}");
-
         var openAIPromptExecutionSettings = new AzureOpenAIPromptExecutionSettings()
         {
             FunctionChoiceBehavior = FunctionChoiceBehavior.Auto()
         };
 
-        (var logger, var kernel, var ai, var knowledge) = await AnsiConsole.Status().StartAsync("Booting up agent...", async ctx =>
+        var (logger, kernel, ai, knowledge) = await AnsiConsole.Status().StartAsync("Booting up agent...", async ctx =>
         {
             ctx.Spinner(Spinner.Known.Default);
             ctx.SpinnerStyle(Style.Parse("yellow"));
 
             AnsiConsole.WriteLine("Initializing kernel...");
-            var credentials = new DefaultAzureCredential();
+            
             var sc = new ServiceCollection();
+            sc.AddLogging(b => 
+            {
+                b.ClearProviders(); // Clear default providers
+                b.SetMinimumLevel(enableDebug ? LogLevel.Debug : LogLevel.Information);
+                b.AddProvider(new SpectreConsoleLoggerProvider());
+            });
+            sc.AddKernel();
 
             if (string.IsNullOrEmpty(azureOpenAIApiKey))
             {
+                var credentials = new DefaultAzureCredential();
                 sc.AddAzureOpenAIChatCompletion(chatModelDeploymentName, azureOpenAIEndpoint, credentials);
                 sc.AddAzureOpenAIEmbeddingGenerator(embeddingModelDeploymentName, azureOpenAIEndpoint, credentials);
             }
@@ -87,14 +93,17 @@ public class ChatBot
                 sc.AddAzureOpenAIEmbeddingGenerator(embeddingModelDeploymentName, azureOpenAIEndpoint, azureOpenAIApiKey);
             }
 
-            sc.AddKernel();
-            sc.AddLogging(b => b.AddSimpleConsole(o => { o.ColorBehavior = LoggerColorBehavior.Enabled; }).SetMinimumLevel(enableDebug ? LogLevel.Debug : LogLevel.None));
-
             var services = sc.BuildServiceProvider();
-            var logger = services.GetRequiredService<ILogger<Program>>();
 
-            AnsiConsole.WriteLine("Initializing plugins...");
-            var kernel = services.GetRequiredService<Kernel>();            
+            var kernel = services.GetRequiredService<Kernel>();           
+            var logger = services.GetRequiredService<ILogger<Program>>();            
+
+            if (enableDebug)
+            {
+                logger.LogInformation($"AI Endpoint: {azureOpenAIEndpoint}, Embedding: {embeddingModelDeploymentName}, Chat: {chatModelDeploymentName}");
+            }
+
+            AnsiConsole.WriteLine("Initializing plugins...");             
             kernel.Plugins.AddFromObject(new SearchDatabasePlugin(kernel, logger, sqlConnectionString));
             foreach (var p in kernel.Plugins)
             {
@@ -117,6 +126,13 @@ public class ChatBot
             var eg = services.GetRequiredService<IEmbeddingGenerator<string, Embedding<float>>>();     
 
             AnsiConsole.WriteLine("Initializing vector store...");
+
+            if (enableDebug)
+            {
+                var b = new SqlConnectionStringBuilder(sqlConnectionString);
+                logger.LogInformation($"Server: {b.DataSource}, Database: {b.InitialCatalog}, Table: {sqlTableName}");
+            }
+
             var vectorStore =  new SqlServerVectorStore(sqlConnectionString, new SqlServerVectorStoreOptions() { EmbeddingGenerator = eg });        
             var knowledgeCollection = vectorStore.GetCollection<int, Memory>(sqlTableName);                    
             await knowledgeCollection.EnsureCollectionExistsAsync();                       
